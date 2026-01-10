@@ -3,7 +3,9 @@ package main
 import (
 	"context"
 	"log/slog"
+	"mime"
 	"os"
+	"path/filepath"
 
 	"github.com/joho/godotenv"
 	"google.golang.org/genai"
@@ -29,9 +31,23 @@ func main() {
 		os.Exit(1)
 	}
 
-	imgData, err := os.ReadFile("sample-bill.jpg")
+	billFileName := "sample-bill.jpg"
+	imgData, err := os.ReadFile(billFileName)
 	if err != nil {
 		slog.Error("failed to read image file", "error", err)
+		os.Exit(1)
+	}
+
+	mimeType := mime.TypeByExtension(filepath.Ext(billFileName))
+	if mimeType == "" {
+		slog.Error("could not determine MIME type from file extension", "filename", billFileName)
+		os.Exit(1)
+	}
+
+	promptFileName := "bill-prompt.txt"
+	textPrompt, err := os.ReadFile(promptFileName)
+	if err != nil {
+		slog.Error("failed to read prompt file", "error", err)
 		os.Exit(1)
 	}
 
@@ -42,12 +58,12 @@ func main() {
 			{
 				Parts: []*genai.Part{
 					{
-						Text: "what is this bill about? can you list down items as well. if this is not a bill then you can say so!",
+						Text: string(textPrompt),
 					},
 					{
 						InlineData: &genai.Blob{
 							Data:     imgData,
-							MIMEType: "image/jpeg",
+							MIMEType: mimeType,
 						},
 					},
 				},
