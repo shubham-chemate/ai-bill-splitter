@@ -14,7 +14,7 @@ it3, 500, 5, 0, 2500
 it4, 10, 3, 10, 40
 ```
 
-### Rules
+you will also be given rules  
 
 - There are 5 friends: `fr1`, `fr2`, `fr3`, `fr4`, `fr5`.
 - An item is shared by everyone if it is not specifically mentioned in the rules.
