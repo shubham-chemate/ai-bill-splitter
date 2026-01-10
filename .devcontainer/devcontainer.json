@@ -1,0 +1,21 @@
+{
+  "name": "ai-bill-splitter",
+  "image": "golang:alpine",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "golang.go"
+      ],
+      "settings": {
+        // Alpine-specific linting config
+        "go.toolsEnvVars": { "CGO_ENABLED": "0" }
+      }
+    }
+  },
+
+  // Installs git automatically so 'go get' works for dependencies
+  "postCreateCommand": "apk update && apk add git",
+
+  // Allow the debugger (Delve) to work inside a container
+    "runArgs": [ "--cap-add=SYS_PTRACE", "--security-opt", "seccomp=unconfined" ]
+}
