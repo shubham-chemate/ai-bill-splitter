@@ -31,7 +31,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	billFileName := "sample-bill.jpg"
+	billFileName := "furniture-bill.jpg"
 	imgData, err := os.ReadFile(billFileName)
 	if err != nil {
 		slog.Error("failed to read image file", "error", err)

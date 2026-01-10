@@ -1,2 +1,4 @@
-what is this bill about? can you list down items as well. 
-if this is not a bill then you can say so!
+what is this bill about? can you list down items as well.
+please give me list of items, along with total bill for each item as json
+if this is not a bill then you can return empty json
+please do not include any text, since this json will be parsed to get structured data
