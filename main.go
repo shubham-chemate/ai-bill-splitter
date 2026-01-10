@@ -2,7 +2,9 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"log"
 	"log/slog"
 	"os"
 
@@ -12,11 +14,11 @@ import (
 
 func main() {
 	if err := godotenv.Load(); err != nil {
-		slog.Warn("no .env file found, reading from environment variable")
+		slog.Warn("no .env file found", "error", err)
 	}
 
 	var apiKey = os.Getenv("GEMINI_API_KEY")
-	slog.Info(fmt.Sprintf("%d", len(apiKey)))
+	slog.Info("api key loaded", "length", len(apiKey))
 
 	ctx := context.Background()
 
@@ -25,21 +27,37 @@ func main() {
 		Backend: genai.BackendGeminiAPI,
 	})
 	if err != nil {
-		slog.Error(err.Error())
-		return
+		slog.Error("failed to create client", "error", err)
+		os.Exit(1)
 	}
 
-	result, err := client.Models.GenerateContent(
-		ctx,
-		"gemini-2.5-flash",
-		genai.Text("hey"),
-		nil,
-	)
-
+	chat, err := client.Chats.Create(ctx, "gemini-2.5-flash", nil, nil)
 	if err != nil {
-		slog.Error(err.Error())
-		return
+		slog.Error("failed to create chat", "error", err)
+		os.Exit(1)
 	}
 
-	slog.Info(result.Text())
+	result, err := chat.SendMessage(ctx, genai.Part{Text: "how's the weather in pune today?"})
+	if err != nil {
+		slog.Error("error while chatting", "error", err)
+	}
+
+	debugPrint(result)
+
+	result, err = chat.SendMessage(ctx, genai.Part{Text: "it's feeling cold here? for much more days we should expect low temperature?"})
+	if err != nil {
+		slog.Error("error while chatting", "error", err)
+	}
+
+	debugPrint(result)
+}
+
+func debugPrint[T any](r *T) {
+
+	response, err := json.MarshalIndent(*r, "", "  ")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println(string(response))
 }
