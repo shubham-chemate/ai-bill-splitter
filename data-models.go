@@ -31,4 +31,5 @@ type SplitByItem struct {
 type PersonSplits struct {
 	PersonName  string
 	SplitByItem []SplitByItem
+	TotalAmount float64
 }

@@ -186,9 +186,14 @@ func getFriendsSplit(billItems BillItems, itemsSplit ItemsSplit) ([]PersonSplits
 
 	personsSplitsArray := make([]PersonSplits, 0)
 	for personName, personSplits := range personsSplits {
+		totalAmount := 0.0
+		for _, split := range personSplits {
+			totalAmount += split.Amount
+		}
 		record := PersonSplits{
 			PersonName:  personName,
 			SplitByItem: personSplits,
+			TotalAmount: totalAmount,
 		}
 		personsSplitsArray = append(personsSplitsArray, record)
 	}
@@ -196,7 +201,7 @@ func getFriendsSplit(billItems BillItems, itemsSplit ItemsSplit) ([]PersonSplits
 	return personsSplitsArray, nil
 }
 
-func main() {
+func main1() {
 	if err := godotenv.Load(); err != nil {
 		slog.Warn("no .env file found", "error", err)
 		os.Exit(1)
@@ -304,10 +309,11 @@ func main() {
 		os.Exit(1)
 	}
 
+	fmt.Println("Bill Splitted as below:")
 	for _, personSplit := range personSplits {
 		// slog.Info("person split received", "personSplit", personSplit)
 
-		fmt.Printf("Person name: %s\n", personSplit.PersonName)
+		fmt.Printf("(%s, Amt: %0.3f)\n", personSplit.PersonName, personSplit.TotalAmount)
 		for _, items := range personSplit.SplitByItem {
 			if items.Amount >= 0.01 {
 				fmt.Printf("- item: %s, amount: %.3f\n", items.ItemName, items.Amount)
