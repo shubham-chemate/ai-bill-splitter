@@ -142,7 +142,7 @@ func validateItemSplit(billItems BillItems, itemsSplit ItemsSplit) error {
 
 	for i := range len(itemList) {
 		if itemList[i] != itemSplitItems[i] {
-			return fmt.Errorf("different item names in bill and split", "bill-items", itemList, "item split items", itemSplitItems)
+			return fmt.Errorf("different item names in bill and split, billItems: %v, split items: %v", itemList, itemSplitItems)
 		}
 	}
 
