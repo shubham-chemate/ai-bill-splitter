@@ -113,16 +113,6 @@ func validateBill(billItems BillItems) error {
 	return nil
 }
 
-func getFriendsSplit(billItems BillItems, itemsSplit ItemsSplit) ([]PersonSplits, error) {
-	if len(billItems) == 0 {
-		return nil, fmt.Errorf("empty billItems")
-	}
-	if len(itemsSplit) == 0 {
-		return nil, fmt.Errorf("empty items split")
-	}
-	return []PersonSplits{}, nil
-}
-
 func validateItemSplit(billItems BillItems, itemsSplit ItemsSplit) error {
 	itemList := []string{}
 	for _, billItem := range billItems {
@@ -131,6 +121,15 @@ func validateItemSplit(billItems BillItems, itemsSplit ItemsSplit) error {
 	itemSplitItems := []string{}
 	for _, splitItem := range itemsSplit {
 		itemSplitItems = append(itemSplitItems, splitItem.ItemName)
+
+		// split share amoung all friends should be nearly 1
+		sum := 0.0
+		for _, split := range splitItem.Splits {
+			sum += split.PersonShare
+		}
+		if sum > 1.010 || sum < 0.990 {
+			return fmt.Errorf("item split is invalid, sum is not in [0.990, 1.010]", "item", splitItem.ItemName, "itemsplit", splitItem.Splits)
+		}
 	}
 
 	if len(itemList) != len(itemSplitItems) {
@@ -147,6 +146,54 @@ func validateItemSplit(billItems BillItems, itemsSplit ItemsSplit) error {
 	}
 
 	return nil
+}
+
+func getFriendsSplit(billItems BillItems, itemsSplit ItemsSplit) ([]PersonSplits, error) {
+	if len(billItems) == 0 {
+		return nil, fmt.Errorf("empty billItems")
+	}
+	if len(itemsSplit) == 0 {
+		return nil, fmt.Errorf("empty items split")
+	}
+
+	itemsPrices := make(map[string]float64)
+	for _, billItem := range billItems {
+		itemsPrices[billItem.ItemName] = billItem.TotalPrice
+	}
+
+	personsSplits := make(map[string][]SplitByItem)
+	for _, itemSplit := range itemsSplit {
+		itemName := itemSplit.ItemName
+		itemPrice := itemsPrices[itemName]
+
+		for _, split := range itemSplit.Splits {
+			personName := split.PersonName
+			personShare := split.PersonShare
+
+			_, exist := personsSplits[personName]
+			if !exist {
+				personsSplits[personName] = make([]SplitByItem, 0)
+			}
+
+			splitForPerson := SplitByItem{
+				ItemName: itemName,
+				Amount:   personShare * itemPrice,
+			}
+
+			personsSplits[personName] = append(personsSplits[personName], splitForPerson)
+		}
+	}
+
+	personsSplitsArray := make([]PersonSplits, 0)
+	for personName, personSplits := range personsSplits {
+		record := PersonSplits{
+			PersonName:  personName,
+			SplitByItem: personSplits,
+		}
+		personsSplitsArray = append(personsSplitsArray, record)
+	}
+
+	return personsSplitsArray, nil
 }
 
 func main() {
