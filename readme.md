@@ -6,12 +6,13 @@ Given a dinner/shopping bill among friends and a set of rules, split the bill am
 
 The bill is expected in the following format:
 
-```csv
-item, price, quantity, tax, total
-it1, 100, 2, 0, 200
-it2, 50, 2, 10, 110
-it3, 500, 5, 0, 2500
-it4, 10, 3, 10, 40
+```
+| Item | Price | Quantity | Tax  | Total |
+|------|-------|----------|------|-------|
+| it1  | 100   | 2        | 0    | 200   |
+| it2  | 50    | 2        | 10   | 110   |
+| it3  | 500   | 5        | 0    | 2500  |
+| it4  | 10    | 3        | 10   | 40    |
 ```
 
 you will also be given rules  
@@ -24,42 +25,12 @@ you will also be given rules
 ### Output
 
 The output format is as follows:
-
-**fr1**
-```text
-it1 100
-it3 500
-it4 8
-total 608
 ```
-
-**fr2**
-```text
-it1 100
-it2 105
-it3 500
-it4 8
-total 713
-```
-
-**fr3**
-```text
-it2 105
-it3 500
-it4 8
-total 613
-```
-
-**fr4**
-```text
-it3 500
-it4 8
-total 508
-```
-
-**fr5**
-```text
-it3 500
-it4 8
-total 508
+| Person | it1    | it2    | it3    | it4   | Total  |
+|--------|--------|--------|--------|-------|--------|
+| fr1    | 100.00 | -      | 500.00 | 8.00  | 608.00 |
+| fr2    | 100.00 | 105.00 | 500.00 | 8.00  | 713.00 |
+| fr3    | -      | 105.00 | 500.00 | 8.00  | 613.00 |
+| fr4    | -      | -      | 500.00 | 8.00  | 508.00 |
+| fr5    | -      | -      | 500.00 | 8.00  | 508.00 |
 ```
