@@ -8,6 +8,7 @@ import (
 	"mime"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	"github.com/joho/godotenv"
@@ -84,6 +85,16 @@ func cleanRawJson(rawJson string) string {
 	return rawJson
 }
 
+func getItemsListAsString(billItems BillItems) string {
+	itemsString := "the items are - "
+	for _, billItem := range billItems {
+		itemsString += billItem.ItemName
+		itemsString += ", "
+	}
+	itemsString += "\n"
+	return itemsString
+}
+
 func validateBill(billItems BillItems) error {
 	for _, billItem := range billItems {
 		if billItem.TotalPrice == -1 {
@@ -110,6 +121,32 @@ func getFriendsSplit(billItems BillItems, itemsSplit ItemsSplit) ([]PersonSplits
 		return nil, fmt.Errorf("empty items split")
 	}
 	return []PersonSplits{}, nil
+}
+
+func validateItemSplit(billItems BillItems, itemsSplit ItemsSplit) error {
+	itemList := []string{}
+	for _, billItem := range billItems {
+		itemList = append(itemList, billItem.ItemName)
+	}
+	itemSplitItems := []string{}
+	for _, splitItem := range itemsSplit {
+		itemSplitItems = append(itemSplitItems, splitItem.ItemName)
+	}
+
+	if len(itemList) != len(itemSplitItems) {
+		return fmt.Errorf("different number of items in bill and item split")
+	}
+
+	sort.Strings(itemList)
+	sort.Strings(itemSplitItems)
+
+	for i := range len(itemList) {
+		if itemList[i] != itemSplitItems[i] {
+			return fmt.Errorf("different item names in bill and split", "bill-items", itemList, "item split items", itemSplitItems)
+		}
+	}
+
+	return nil
 }
 
 func main() {
@@ -175,16 +212,21 @@ func main() {
 		os.Exit(1)
 	}
 
-	// slog.Info("received bill json from model", "bill json", itemsBill)
-
 	splitConvoFileName := "rules-prompt.txt"
-	splitConvoPrompt, err := os.ReadFile(splitConvoFileName)
+	splitConvoPromptBytes, err := os.ReadFile(splitConvoFileName)
 	if err != nil {
 		slog.Error("failed to read split convo file", "error", err)
 		os.Exit(1)
 	}
 
-	splitConvoRawJson, err := queryModelForRules(client, string(splitConvoPrompt))
+	splitConvoPrompt := string(splitConvoPromptBytes)
+	splitConvoPrompt += getItemsListAsString(itemsBill)
+	splitConvoPrompt += `Akash and Amey buy Office Chair
+						Dipti buy queen size bed
+						Aditya, Suyog and Viraj buys recliner
+						Bookshelf is shared among everyone`
+
+	splitConvoRawJson, err := queryModelForRules(client, splitConvoPrompt)
 	if err != nil {
 		slog.Error("failed to get split convo json", "error", err)
 		os.Exit(1)
@@ -195,15 +237,24 @@ func main() {
 	var itemsSplit ItemsSplit
 	err = json.Unmarshal([]byte(splitConvoRawJson), &itemsSplit)
 	if err != nil {
-		slog.Info("erro while parsing splitConvRawJson", "error", err, "splitConvoRawJson", splitConvoRawJson)
+		slog.Info("error while parsing splitConvRawJson", "error", err, "splitConvoRawJson", splitConvoRawJson)
 		os.Exit(1)
 	}
 
-	slog.Info("split convo raw json is received", "raw json", itemsSplit)
+	err = validateItemSplit(itemsBill, itemsSplit)
+	if err != nil {
+		slog.Error("items validatation failed", "error", err)
+		os.Exit(1)
+	}
+
+	for _, itemSplit := range itemsSplit {
+		slog.Info("itemSplit of item", "itemSplit", itemSplit)
+	}
 
 	personSplits, err := getFriendsSplit(itemsBill, itemsSplit)
 	if err != nil {
 		slog.Info("error getting friends splits", "error", err)
+		os.Exit(1)
 	}
 
 	for _, personSplit := range personSplits {

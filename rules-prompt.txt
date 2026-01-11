@@ -3,9 +3,11 @@ please return a json array of items
 where for each item you have to give the list of friends and their contribution
 you can round floating point number to 3 decimal places, no need to have
 large number of decimal places
+if you don't get explicit share of some items, that mean it is shared by everyone
 
 
 split conversation / rules example:
+the items are it1, it2, it3, it4, it5
 we are four friends fr1, fr2, fr3, fr4
 it1 is shared by fr1 & fr2
 it2 is shared by fr2 & fr3
@@ -36,7 +38,7 @@ so the response should be something like below:
         ]
     },
     {
-        "item": "it2",
+        "itemName": "it2",
         "splits": [
             {
                 "personName":"fr1",
@@ -57,7 +59,7 @@ so the response should be something like below:
         ]
     },
     {
-        "item": "it3",
+        "itemName": "it3",
         "splits": [
             {
                 "personName":"fr1",
@@ -78,7 +80,28 @@ so the response should be something like below:
         ]
     },
     {
-        "item": "it4",
+        "itemName": "it4",
+        "splits": [
+            {
+                "personName":"fr1",
+                "personShare": 0.25
+            },
+            {
+                "personName":"fr2",
+                "personShare": 0.25
+            },
+            {
+                "personName":"fr3",
+                "personShare": 0.25
+            },
+            {
+                "personName":"fr4",
+                "personShare": 0.25
+            }
+        ]
+    },
+    {
+        "itemName": "it5",
         "splits": [
             {
                 "personName":"fr1",
@@ -102,7 +125,3 @@ so the response should be something like below:
 
 
 here is the actual split conversation:
-Akash and Amey buy Office Chair
-Dipti buy queen size bed
-Aditya, Suyog and Viraj buys recliner
-Bookshelf is shared among everyone

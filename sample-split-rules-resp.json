@@ -21,7 +21,7 @@
         ]
     },
     {
-        "item": "it2",
+        "itemName": "it2",
         "splits": [
             {
                 "personName":"fr1",
@@ -42,7 +42,7 @@
         ]
     },
     {
-        "item": "it3",
+        "itemName": "it3",
         "splits": [
             {
                 "personName":"fr1",
@@ -63,7 +63,28 @@
         ]
     },
     {
-        "item": "it4",
+        "itemName": "it4",
+        "splits": [
+            {
+                "personName":"fr1",
+                "personShare": 0.25
+            },
+            {
+                "personName":"fr2",
+                "personShare": 0.25
+            },
+            {
+                "personName":"fr3",
+                "personShare": 0.25
+            },
+            {
+                "personName":"fr4",
+                "personShare": 0.25
+            }
+        ]
+    },
+    {
+        "itemName": "it5",
         "splits": [
             {
                 "personName":"fr1",
