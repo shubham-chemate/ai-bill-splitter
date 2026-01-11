@@ -128,7 +128,7 @@ func validateItemSplit(billItems BillItems, itemsSplit ItemsSplit) error {
 			sum += split.PersonShare
 		}
 		if sum > 1.010 || sum < 0.990 {
-			return fmt.Errorf("item split is invalid, sum is not in [0.990, 1.010]", "item", splitItem.ItemName, "itemsplit", splitItem.Splits)
+			return fmt.Errorf("item split is invalid, sum is not in [0.990, 1.010], item: %v, itemsplit: %v", splitItem.ItemName, splitItem.Splits)
 		}
 	}
 
