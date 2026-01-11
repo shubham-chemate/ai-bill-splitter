@@ -10,33 +10,36 @@ by json parsers
 if given receipt is not a bill, you can return empty json array
 if you unable to recognize the value of any field for an item use the following rules
 - for name you can create contextual name
-- for price, quantity, tax and total you can use zero
+- for pricePerUnit, you can keep it as -1
+- for quantity, you can keep it as -1
+- for tax, you can keep it as 0.0
+- for totalPrice, you can keep it as -1
 use a separate field called warnings of type array and include what you have done
 
 here is sample response for your reference:
 [
     {
-        "name": "it1",
-        "price_per_unit": 100,
+        "itemName": "it1",
+        "pricePerUnit": 100,
         "quantity": 2,
         "tax": 5,
-        "total_price": 210,
-        "warnings": []
+        "totalPrice": 210,
+        "warning": []
     },
     {
-        "name": "item-of-price-50",
-        "price_per_unit": 50,
+        "itemName": "item-of-price-50",
+        "pricePerUnit": 50,
         "quantity": 1,
         "tax": 10,
-        "total_price": 55,
-        "warnings": ["name is not present in the bill image"]
+        "totalPrice": 55,
+        "warning": ["name is not present in the bill image"]
     },
         {
-        "name": "it3",
-        "price_per_unit": 200,
+        "itemName": "it3",
+        "pricePerUnit": 200,
         "quantity": 0,
         "tax": 20,
-        "total_price": 55,
-        "warnings": ["quantity is not present in the bill image"]
+        "totalPrice": 55,
+        "warning": ["quantity is not present in the bill image"]
     }
 ]

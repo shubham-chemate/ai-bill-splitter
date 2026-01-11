@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log/slog"
 	"mime"
 	"os"
@@ -83,6 +84,34 @@ func cleanRawJson(rawJson string) string {
 	return rawJson
 }
 
+func validateBill(billItems BillItems) error {
+	for _, billItem := range billItems {
+		if billItem.TotalPrice == -1 {
+			return fmt.Errorf("total item price is not present, billItem: %+v", billItem)
+		}
+
+		itemTotal := billItem.TotalPrice
+		calculatedTotal := billItem.Tax
+		if billItem.PricePerUnit != -1 && billItem.Quantity != -1 {
+			calculatedTotal += billItem.PricePerUnit * float64(billItem.Quantity)
+		}
+		if itemTotal != calculatedTotal {
+			return fmt.Errorf("item Total not matching calculated total, billItem: %+v", billItem)
+		}
+	}
+	return nil
+}
+
+func getFriendsSplit(billItems BillItems, itemsSplit ItemsSplit) ([]PersonSplits, error) {
+	if len(billItems) == 0 {
+		return nil, fmt.Errorf("empty billItems")
+	}
+	if len(itemsSplit) == 0 {
+		return nil, fmt.Errorf("empty items split")
+	}
+	return []PersonSplits{}, nil
+}
+
 func main() {
 	if err := godotenv.Load(); err != nil {
 		slog.Warn("no .env file found", "error", err)
@@ -140,7 +169,13 @@ func main() {
 		os.Exit(1)
 	}
 
-	slog.Info("received bill json from model", "bill json", itemsBill)
+	err = validateBill(itemsBill)
+	if err != nil {
+		slog.Info("bill validation failed", "error", err)
+		os.Exit(1)
+	}
+
+	// slog.Info("received bill json from model", "bill json", itemsBill)
 
 	splitConvoFileName := "rules-prompt.txt"
 	splitConvoPrompt, err := os.ReadFile(splitConvoFileName)
@@ -165,5 +200,14 @@ func main() {
 	}
 
 	slog.Info("split convo raw json is received", "raw json", itemsSplit)
+
+	personSplits, err := getFriendsSplit(itemsBill, itemsSplit)
+	if err != nil {
+		slog.Info("error getting friends splits", "error", err)
+	}
+
+	for _, personSplit := range personSplits {
+		slog.Info("person split received", "personSplit", personSplit)
+	}
 
 }
