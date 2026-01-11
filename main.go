@@ -131,14 +131,12 @@ func main() {
 		os.Exit(1)
 	}
 
-	// slog.Info("received response from model", "text", billRawJson)
-
 	billRawJson = cleanRawJson(billRawJson)
 
 	var itemsBill BillItems
 	err = json.Unmarshal([]byte(billRawJson), &itemsBill)
 	if err != nil {
-		slog.Info("error while parsing billRawJson", "error", err)
+		slog.Info("error while parsing billRawJson", "error", err, "billRawJson", billRawJson)
 		os.Exit(1)
 	}
 
@@ -162,7 +160,7 @@ func main() {
 	var itemsSplit ItemsSplit
 	err = json.Unmarshal([]byte(splitConvoRawJson), &itemsSplit)
 	if err != nil {
-		slog.Info("erro while parsing splitConvRawJson", "error", err)
+		slog.Info("erro while parsing splitConvRawJson", "error", err, "splitConvoRawJson", splitConvoRawJson)
 		os.Exit(1)
 	}
 
