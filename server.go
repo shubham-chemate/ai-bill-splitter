@@ -20,10 +20,13 @@ func handleBill(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// max 10 MB allowed in memory, others are in disk
-	err := r.ParseMultipartForm(10 * (1 << 20))
+	// we won't be reading files more than 7 MB from client
+	r.Body = http.MaxBytesReader(w, r.Body, MAX_IMAGE_SIZE)
+
+	// max 7 MB allowed in memory, others are in disk
+	err := r.ParseMultipartForm(MAX_IMAGE_SIZE)
 	if err != nil {
-		slog.Info("error while parsing multipart form")
+		slog.Info("error while parsing multipart form, maybe large file", "error", err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
