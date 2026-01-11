@@ -203,7 +203,7 @@ func main() {
 	}
 
 	var apiKey = os.Getenv("GEMINI_API_KEY")
-	slog.Info("api key loaded", "length", len(apiKey))
+	slog.Info("gemini api key loaded", "length", len(apiKey))
 	if len(apiKey) == 0 || apiKey == "" {
 		slog.Warn("invalid api key", "api-key", apiKey)
 		os.Exit(1)
@@ -305,7 +305,14 @@ func main() {
 	}
 
 	for _, personSplit := range personSplits {
-		slog.Info("person split received", "personSplit", personSplit)
+		// slog.Info("person split received", "personSplit", personSplit)
+
+		fmt.Printf("Person name: %s\n", personSplit.PersonName)
+		for _, items := range personSplit.SplitByItem {
+			if items.Amount >= 0.01 {
+				fmt.Printf("- item: %s, amount: %.3f\n", items.ItemName, items.Amount)
+			}
+		}
 	}
 
 }
