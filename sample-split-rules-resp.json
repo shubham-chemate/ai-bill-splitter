@@ -1,0 +1,86 @@
+[
+    {
+        "itemName": "it1",
+        "splits": [
+            {
+                "personName":"fr1",
+                "personShare": 0.5
+            },
+            {
+                "personName":"fr2",
+                "personShare": 0.5
+            },
+            {
+                "personName":"fr3",
+                "personShare": 0.0
+            },
+            {
+                "personName":"fr4",
+                "personShare": 0.0
+            }
+        ]
+    },
+    {
+        "item": "it2",
+        "splits": [
+            {
+                "personName":"fr1",
+                "personShare": 0.0
+            },
+            {
+                "personName":"fr2",
+                "personShare": 0.5
+            },
+            {
+                "personName":"fr3",
+                "personShare": 0.5
+            },
+            {
+                "personName":"fr4",
+                "personShare": 0.0
+            }
+        ]
+    },
+    {
+        "item": "it3",
+        "splits": [
+            {
+                "personName":"fr1",
+                "personShare": 0.333
+            },
+            {
+                "personName":"fr2",
+                "personShare": 0.333
+            },
+            {
+                "personName":"fr3",
+                "personShare": 0.333
+            },
+            {
+                "personName":"fr4",
+                "personShare": 0.0
+            }
+        ]
+    },
+    {
+        "item": "it4",
+        "splits": [
+            {
+                "personName":"fr1",
+                "personShare": 0.25
+            },
+            {
+                "personName":"fr2",
+                "personShare": 0.25
+            },
+            {
+                "personName":"fr3",
+                "personShare": 0.25
+            },
+            {
+                "personName":"fr4",
+                "personShare": 0.25
+            }
+        ]
+    }
+]

@@ -2,14 +2,86 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"log/slog"
 	"mime"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/joho/godotenv"
 	"google.golang.org/genai"
 )
+
+func queryModelForBill(client *genai.Client, billImage []byte, mimeType string, prompt []byte) (string, error) {
+	resp, err := client.Models.GenerateContent(
+		context.Background(),
+		"gemini-2.5-flash",
+		[]*genai.Content{
+			{
+				Parts: []*genai.Part{
+					{Text: string(prompt)},
+					{
+						InlineData: &genai.Blob{
+							Data:     billImage,
+							MIMEType: mimeType,
+						},
+					},
+				},
+			},
+		},
+		nil,
+	)
+
+	if err != nil {
+		return "", err
+	}
+
+	return extractText(resp), nil
+}
+
+func queryModelForRules(client *genai.Client, prompt string) (string, error) {
+	resp, err := client.Models.GenerateContent(
+		context.Background(),
+		"gemini-2.5-flash",
+		[]*genai.Content{
+			{
+				Parts: []*genai.Part{
+					{Text: string(prompt)},
+				},
+			},
+		},
+		nil,
+	)
+
+	if err != nil {
+		return "", err
+	}
+
+	return extractText(resp), nil
+}
+
+func extractText(resp *genai.GenerateContentResponse) string {
+	if len(resp.Candidates) == 0 || resp.Candidates[0].Content == nil {
+		return ""
+	}
+
+	var sb strings.Builder
+	for _, part := range resp.Candidates[0].Content.Parts {
+		sb.WriteString(string(part.Text))
+	}
+	return sb.String()
+}
+
+func cleanRawJson(rawJson string) string {
+	rawJson = strings.TrimSpace(rawJson)
+	rawJson = strings.TrimPrefix(rawJson, "```json")
+	rawJson = strings.TrimSuffix(rawJson, "```")
+	rawJson = strings.TrimSpace(rawJson)
+	rawJson = strings.TrimPrefix(rawJson, "\ufeff")
+
+	return rawJson
+}
 
 func main() {
 	if err := godotenv.Load(); err != nil {
@@ -19,20 +91,13 @@ func main() {
 
 	var apiKey = os.Getenv("GEMINI_API_KEY")
 	slog.Info("api key loaded", "length", len(apiKey))
-
-	ctx := context.Background()
-
-	client, err := genai.NewClient(ctx, &genai.ClientConfig{
-		APIKey:  apiKey,
-		Backend: genai.BackendGeminiAPI,
-	})
-	if err != nil {
-		slog.Error("failed to create client", "error", err)
+	if len(apiKey) == 0 || apiKey == "" {
+		slog.Warn("invalid api key", "api-key", apiKey)
 		os.Exit(1)
 	}
 
 	billFileName := "furniture-bill.jpg"
-	imgData, err := os.ReadFile(billFileName)
+	billImage, err := os.ReadFile(billFileName)
 	if err != nil {
 		slog.Error("failed to read image file", "error", err)
 		os.Exit(1)
@@ -45,43 +110,62 @@ func main() {
 	}
 
 	promptFileName := "bill-prompt.txt"
-	textPrompt, err := os.ReadFile(promptFileName)
+	prompt, err := os.ReadFile(promptFileName)
 	if err != nil {
-		slog.Error("failed to read prompt file", "error", err)
+		slog.Error("failed to read bill prompt file", "error", err)
 		os.Exit(1)
 	}
 
-	resp, err := client.Models.GenerateContent(
-		ctx,
-		"gemini-2.5-flash",
-		[]*genai.Content{
-			{
-				Parts: []*genai.Part{
-					{
-						Text: string(textPrompt),
-					},
-					{
-						InlineData: &genai.Blob{
-							Data:     imgData,
-							MIMEType: mimeType,
-						},
-					},
-				},
-			},
-		},
-		nil,
-	)
+	client, err := genai.NewClient(context.Background(), &genai.ClientConfig{
+		APIKey:  apiKey,
+		Backend: genai.BackendGeminiAPI,
+	})
+	if err != nil {
+		slog.Error("failed to create client", "error", err)
+		os.Exit(1)
+	}
+
+	billRawJson, err := queryModelForBill(client, billImage, mimeType, prompt)
 	if err != nil {
 		slog.Error("failed to generate content", "error", err)
 		os.Exit(1)
 	}
 
-	text := ""
-	if len(resp.Candidates) > 0 && resp.Candidates[0].Content != nil {
-		for _, part := range resp.Candidates[0].Content.Parts {
-			text += string(part.Text)
-		}
+	// slog.Info("received response from model", "text", billRawJson)
+
+	billRawJson = cleanRawJson(billRawJson)
+
+	var itemsBill BillItems
+	err = json.Unmarshal([]byte(billRawJson), &itemsBill)
+	if err != nil {
+		slog.Info("error while parsing billRawJson", "error", err)
+		os.Exit(1)
 	}
 
-	slog.Info("received response from model", "text", text)
+	slog.Info("received bill json from model", "bill json", itemsBill)
+
+	splitConvoFileName := "rules-prompt.txt"
+	splitConvoPrompt, err := os.ReadFile(splitConvoFileName)
+	if err != nil {
+		slog.Error("failed to read split convo file", "error", err)
+		os.Exit(1)
+	}
+
+	splitConvoRawJson, err := queryModelForRules(client, string(splitConvoPrompt))
+	if err != nil {
+		slog.Error("failed to get split convo json", "error", err)
+		os.Exit(1)
+	}
+
+	splitConvoRawJson = cleanRawJson(splitConvoRawJson)
+
+	var itemsSplit ItemsSplit
+	err = json.Unmarshal([]byte(splitConvoRawJson), &itemsSplit)
+	if err != nil {
+		slog.Info("erro while parsing splitConvRawJson", "error", err)
+		os.Exit(1)
+	}
+
+	slog.Info("split convo raw json is received", "raw json", itemsSplit)
+
 }

@@ -1,0 +1,26 @@
+[
+    {
+        "itemName": "it1",
+        "pricePerUnit": 100,
+        "quantity": 2,
+        "tax": 5,
+        "totalPrice": 210,
+        "warning": []
+    },
+    {
+        "itemName": "item-of-price-50",
+        "pricePerUnit": 50,
+        "quantity": 1,
+        "tax": 10,
+        "totalPrice": 55,
+        "warning": ["name is not present in the bill image"]
+    },
+        {
+        "itemName": "it3",
+        "pricePerUnit": 200,
+        "quantity": 0,
+        "tax": 20,
+        "totalPrice": 55,
+        "warning": ["quantity is not present in the bill image"]
+    }
+]

@@ -1,0 +1,108 @@
+you have given a bill split in natural language
+please return a json array of items
+where for each item you have to give the list of friends and their contribution
+you can round floating point number to 3 decimal places, no need to have
+large number of decimal places
+
+
+split conversation / rules example:
+we are four friends fr1, fr2, fr3, fr4
+it1 is shared by fr1 & fr2
+it2 is shared by fr2 & fr3
+it3 is shared by fr1, fr2 & fr3
+it4 is shared by everyone
+
+so the response should be something like below:
+[
+    {
+        "itemName": "it1",
+        "splits": [
+            {
+                "personName":"fr1",
+                "personShare": 0.5
+            },
+            {
+                "personName":"fr2",
+                "personShare": 0.5
+            },
+            {
+                "personName":"fr3",
+                "personShare": 0.0
+            },
+            {
+                "personName":"fr4",
+                "personShare": 0.0
+            }
+        ]
+    },
+    {
+        "item": "it2",
+        "splits": [
+            {
+                "personName":"fr1",
+                "personShare": 0.0
+            },
+            {
+                "personName":"fr2",
+                "personShare": 0.5
+            },
+            {
+                "personName":"fr3",
+                "personShare": 0.5
+            },
+            {
+                "personName":"fr4",
+                "personShare": 0.0
+            }
+        ]
+    },
+    {
+        "item": "it3",
+        "splits": [
+            {
+                "personName":"fr1",
+                "personShare": 0.333
+            },
+            {
+                "personName":"fr2",
+                "personShare": 0.333
+            },
+            {
+                "personName":"fr3",
+                "personShare": 0.333
+            },
+            {
+                "personName":"fr4",
+                "personShare": 0.0
+            }
+        ]
+    },
+    {
+        "item": "it4",
+        "splits": [
+            {
+                "personName":"fr1",
+                "personShare": 0.25
+            },
+            {
+                "personName":"fr2",
+                "personShare": 0.25
+            },
+            {
+                "personName":"fr3",
+                "personShare": 0.25
+            },
+            {
+                "personName":"fr4",
+                "personShare": 0.25
+            }
+        ]
+    }
+]
+
+
+here is the actual split conversation:
+Akash and Amey buy Office Chair
+Dipti buy queen size bed
+Aditya, Suyog and Viraj buys recliner
+Bookshelf is shared among everyone
