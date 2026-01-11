@@ -10,6 +10,9 @@ import (
 	"path/filepath"
 )
 
+// 7 MB
+const MAX_IMAGE_SIZE = 7 * (1 << 20)
+
 func handleBill(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		w.WriteHeader(http.StatusMethodNotAllowed)
@@ -17,7 +20,7 @@ func handleBill(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// max 10 MB allowed in memory
+	// max 10 MB allowed in memory, others are in disk
 	err := r.ParseMultipartForm(10 * (1 << 20))
 	if err != nil {
 		slog.Info("error while parsing multipart form")
@@ -32,6 +35,12 @@ func handleBill(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer file.Close()
+
+	if fileHeader.Size > MAX_IMAGE_SIZE {
+		w.WriteHeader(http.StatusBadRequest)
+		slog.Info("image exceeds allowed size limit", "size", fileHeader.Size, "limit", MAX_IMAGE_SIZE)
+		return
+	}
 
 	billImgFileData, err := io.ReadAll(file)
 	if err != nil {
