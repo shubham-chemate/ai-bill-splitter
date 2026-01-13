@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"io"
-	"log"
 	"log/slog"
 	"mime"
 	"net/http"
@@ -26,7 +25,7 @@ func handleBill(w http.ResponseWriter, r *http.Request) {
 	// max 7 MB allowed in memory, others are in disk
 	err := r.ParseMultipartForm(MAX_IMAGE_SIZE)
 	if err != nil {
-		slog.Info("error while parsing multipart form, maybe large file", "error", err)
+		slog.Info("error while parsing multipart form", "error", err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -54,7 +53,7 @@ func handleBill(w http.ResponseWriter, r *http.Request) {
 	mimeType := mime.TypeByExtension(filepath.Ext(fileHeader.Filename))
 	if mimeType == "" {
 		slog.Info("mimetype must be present, it should be of image", "mimeType received is", mimeType)
-		w.WriteHeader(http.StatusBadGateway)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
@@ -65,7 +64,7 @@ func handleBill(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	slog.Info("billImage received", "size", len(billImgFileData))
+	slog.Info("billImage received", "bytesize", len(billImgFileData), "filesize", fileHeader.Size)
 	slog.Info("split rules received", "split-rules", rules)
 
 	response := map[string]interface{}{
@@ -76,14 +75,4 @@ func handleBill(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
 
-}
-
-func main() {
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("hello world!"))
-	})
-
-	http.HandleFunc("/split", handleBill)
-
-	log.Fatal(http.ListenAndServe(":8080", nil))
 }

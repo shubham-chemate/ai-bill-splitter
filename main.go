@@ -4,76 +4,15 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"log/slog"
-	"mime"
+	"net/http"
 	"os"
-	"path/filepath"
-	"sort"
 	"strings"
 
 	"github.com/joho/godotenv"
 	"google.golang.org/genai"
 )
-
-func queryModelForBill(client *genai.Client, billImage []byte, mimeType string, prompt []byte) (string, error) {
-	resp, err := client.Models.GenerateContent(
-		context.Background(),
-		"gemini-2.5-flash",
-		[]*genai.Content{
-			{
-				Parts: []*genai.Part{
-					{Text: string(prompt)},
-					{
-						InlineData: &genai.Blob{
-							Data:     billImage,
-							MIMEType: mimeType,
-						},
-					},
-				},
-			},
-		},
-		nil,
-	)
-
-	if err != nil {
-		return "", err
-	}
-
-	return extractText(resp), nil
-}
-
-func queryModelForRules(client *genai.Client, prompt string) (string, error) {
-	resp, err := client.Models.GenerateContent(
-		context.Background(),
-		"gemini-2.5-flash",
-		[]*genai.Content{
-			{
-				Parts: []*genai.Part{
-					{Text: string(prompt)},
-				},
-			},
-		},
-		nil,
-	)
-
-	if err != nil {
-		return "", err
-	}
-
-	return extractText(resp), nil
-}
-
-func extractText(resp *genai.GenerateContentResponse) string {
-	if len(resp.Candidates) == 0 || resp.Candidates[0].Content == nil {
-		return ""
-	}
-
-	var sb strings.Builder
-	for _, part := range resp.Candidates[0].Content.Parts {
-		sb.WriteString(string(part.Text))
-	}
-	return sb.String()
-}
 
 func cleanRawJson(rawJson string) string {
 	rawJson = strings.TrimSpace(rawJson)
@@ -95,113 +34,7 @@ func getItemsListAsString(billItems BillItems) string {
 	return itemsString
 }
 
-func validateBill(billItems BillItems) error {
-	for _, billItem := range billItems {
-		if billItem.TotalPrice == -1 {
-			return fmt.Errorf("total item price is not present, billItem: %+v", billItem)
-		}
-
-		itemTotal := billItem.TotalPrice
-		calculatedTotal := billItem.Tax
-		if billItem.PricePerUnit != -1 && billItem.Quantity != -1 {
-			calculatedTotal += billItem.PricePerUnit * float64(billItem.Quantity)
-		}
-		if itemTotal != calculatedTotal {
-			return fmt.Errorf("item Total not matching calculated total, billItem: %+v", billItem)
-		}
-	}
-	return nil
-}
-
-func validateItemSplit(billItems BillItems, itemsSplit ItemsSplit) error {
-	itemList := []string{}
-	for _, billItem := range billItems {
-		itemList = append(itemList, billItem.ItemName)
-	}
-	itemSplitItems := []string{}
-	for _, splitItem := range itemsSplit {
-		itemSplitItems = append(itemSplitItems, splitItem.ItemName)
-
-		// split share amoung all friends should be nearly 1
-		sum := 0.0
-		for _, split := range splitItem.Splits {
-			sum += split.PersonShare
-		}
-		if sum > 1.010 || sum < 0.990 {
-			return fmt.Errorf("item split is invalid, sum is not in [0.990, 1.010], item: %v, itemsplit: %v", splitItem.ItemName, splitItem.Splits)
-		}
-	}
-
-	if len(itemList) != len(itemSplitItems) {
-		return fmt.Errorf("different number of items in bill and item split")
-	}
-
-	sort.Strings(itemList)
-	sort.Strings(itemSplitItems)
-
-	for i := range len(itemList) {
-		if itemList[i] != itemSplitItems[i] {
-			return fmt.Errorf("different item names in bill and split, billItems: %v, split items: %v", itemList, itemSplitItems)
-		}
-	}
-
-	return nil
-}
-
-func getFriendsSplit(billItems BillItems, itemsSplit ItemsSplit) ([]PersonSplits, error) {
-	if len(billItems) == 0 {
-		return nil, fmt.Errorf("empty billItems")
-	}
-	if len(itemsSplit) == 0 {
-		return nil, fmt.Errorf("empty items split")
-	}
-
-	itemsPrices := make(map[string]float64)
-	for _, billItem := range billItems {
-		itemsPrices[billItem.ItemName] = billItem.TotalPrice
-	}
-
-	personsSplits := make(map[string][]SplitByItem)
-	for _, itemSplit := range itemsSplit {
-		itemName := itemSplit.ItemName
-		itemPrice := itemsPrices[itemName]
-
-		for _, split := range itemSplit.Splits {
-			personName := split.PersonName
-			personShare := split.PersonShare
-
-			_, exist := personsSplits[personName]
-			if !exist {
-				personsSplits[personName] = make([]SplitByItem, 0)
-			}
-
-			splitForPerson := SplitByItem{
-				ItemName: itemName,
-				Amount:   personShare * itemPrice,
-			}
-
-			personsSplits[personName] = append(personsSplits[personName], splitForPerson)
-		}
-	}
-
-	personsSplitsArray := make([]PersonSplits, 0)
-	for personName, personSplits := range personsSplits {
-		totalAmount := 0.0
-		for _, split := range personSplits {
-			totalAmount += split.Amount
-		}
-		record := PersonSplits{
-			PersonName:  personName,
-			SplitByItem: personSplits,
-			TotalAmount: totalAmount,
-		}
-		personsSplitsArray = append(personsSplitsArray, record)
-	}
-
-	return personsSplitsArray, nil
-}
-
-func main1() {
+func main() {
 	if err := godotenv.Load(); err != nil {
 		slog.Warn("no .env file found", "error", err)
 		os.Exit(1)
@@ -214,26 +47,6 @@ func main1() {
 		os.Exit(1)
 	}
 
-	billFileName := "furniture-bill.jpg"
-	billImage, err := os.ReadFile(billFileName)
-	if err != nil {
-		slog.Error("failed to read image file", "error", err)
-		os.Exit(1)
-	}
-
-	mimeType := mime.TypeByExtension(filepath.Ext(billFileName))
-	if mimeType == "" {
-		slog.Error("could not determine MIME type from file extension", "filename", billFileName)
-		os.Exit(1)
-	}
-
-	promptFileName := "bill-prompt.txt"
-	prompt, err := os.ReadFile(promptFileName)
-	if err != nil {
-		slog.Error("failed to read bill prompt file", "error", err)
-		os.Exit(1)
-	}
-
 	client, err := genai.NewClient(context.Background(), &genai.ClientConfig{
 		APIKey:  apiKey,
 		Backend: genai.BackendGeminiAPI,
@@ -243,67 +56,56 @@ func main1() {
 		os.Exit(1)
 	}
 
-	billRawJson, err := queryModelForBill(client, billImage, mimeType, prompt)
+	billImage, mimeType := getBillImage()
+	prompt := getBillReceptPrompt()
+
+	billItemsRawResp, err := queryModelForBillReceipt(client, billImage, mimeType, prompt)
 	if err != nil {
 		slog.Error("failed to generate content", "error", err)
 		os.Exit(1)
 	}
 
-	billRawJson = cleanRawJson(billRawJson)
+	billItemsRawResp = cleanRawJson(billItemsRawResp)
 
-	var itemsBill BillItems
-	err = json.Unmarshal([]byte(billRawJson), &itemsBill)
+	var billItems BillItems
+	err = json.Unmarshal([]byte(billItemsRawResp), &billItems)
 	if err != nil {
-		slog.Info("error while parsing billRawJson", "error", err, "billRawJson", billRawJson)
+		slog.Info("error while parsing billRawJson", "error", err, "billRawJson", billItemsRawResp)
 		os.Exit(1)
 	}
 
-	err = validateBill(itemsBill)
+	err = validateBillItems(billItems)
 	if err != nil {
 		slog.Info("bill validation failed", "error", err)
 		os.Exit(1)
 	}
 
-	splitConvoFileName := "rules-prompt.txt"
-	splitConvoPromptBytes, err := os.ReadFile(splitConvoFileName)
-	if err != nil {
-		slog.Error("failed to read split convo file", "error", err)
-		os.Exit(1)
-	}
+	splitConvoPrompt := string(getSplitConvoPrompt())
+	splitConvoPrompt += getItemsListAsString(billItems)
+	splitConvoPrompt += getSplitConvo()
 
-	splitConvoPrompt := string(splitConvoPromptBytes)
-	splitConvoPrompt += getItemsListAsString(itemsBill)
-	splitConvoPrompt += `Akash and Amey buy Office Chair
-						Dipti buy queen size bed
-						Aditya, Suyog and Viraj buys recliner
-						Bookshelf is shared among everyone`
-
-	splitConvoRawJson, err := queryModelForRules(client, splitConvoPrompt)
+	splitConvoRawResp, err := queryModelForSplitConvo(client, splitConvoPrompt)
 	if err != nil {
 		slog.Error("failed to get split convo json", "error", err)
 		os.Exit(1)
 	}
 
-	splitConvoRawJson = cleanRawJson(splitConvoRawJson)
+	splitConvoRawResp = cleanRawJson(splitConvoRawResp)
 
 	var itemsSplit ItemsSplit
-	err = json.Unmarshal([]byte(splitConvoRawJson), &itemsSplit)
+	err = json.Unmarshal([]byte(splitConvoRawResp), &itemsSplit)
 	if err != nil {
-		slog.Info("error while parsing splitConvRawJson", "error", err, "splitConvoRawJson", splitConvoRawJson)
+		slog.Info("error while parsing splitConvRawJson", "error", err, "splitConvoRawJson", splitConvoRawResp)
 		os.Exit(1)
 	}
 
-	err = validateItemSplit(itemsBill, itemsSplit)
+	err = validateItemsSplit(billItems, itemsSplit)
 	if err != nil {
-		slog.Error("items validatation failed", "error", err)
+		slog.Error("items split validatation failed", "error", err)
 		os.Exit(1)
 	}
 
-	for _, itemSplit := range itemsSplit {
-		slog.Info("itemSplit of item", "itemSplit", itemSplit)
-	}
-
-	personSplits, err := getFriendsSplit(itemsBill, itemsSplit)
+	personSplits, err := getPersonsSplit(billItems, itemsSplit)
 	if err != nil {
 		slog.Info("error getting friends splits", "error", err)
 		os.Exit(1)
@@ -320,5 +122,13 @@ func main1() {
 			}
 		}
 	}
+
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("hello world!"))
+	})
+
+	http.HandleFunc("/split", handleBill)
+
+	log.Fatal(http.ListenAndServe(":8080", nil))
 
 }

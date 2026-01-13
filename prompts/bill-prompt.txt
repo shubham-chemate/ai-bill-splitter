@@ -1,20 +1,23 @@
-you are given a bill receipt of shopping / dinner
+you are given a bill receipt of shopping / dinner etc.
 can you please give me the items from the bill
 give me the array of items where for each item
 you have to give me it's name, price per 1 unit,
 number of units purchased, total tax on that item 
 and final total bill of that particular item
+
 return response in json format
 other than json response do not include anything since response is used
 by json parsers
+
 if given receipt is not a bill, you can return empty json array
-if you unable to recognize the value of any field for an item use the following rules
+
+if you are unable to recognize the value of any field for an item, use the following rules
 - for name you can create contextual name
 - for pricePerUnit, you can keep it as -1
 - for quantity, you can keep it as -1
 - for tax, you can keep it as 0.0
 - for totalPrice, you can keep it as -1
-use a separate field called warnings of type array and include what you have done
+use a separate field called warnings of type array and add appropriate message
 
 here is sample response for your reference:
 [

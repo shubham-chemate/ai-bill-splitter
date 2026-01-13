@@ -3,6 +3,7 @@ please return a json array of items
 where for each item you have to give the list of friends and their contribution
 you can round floating point number to 3 decimal places, no need to have
 large number of decimal places
+
 if you don't get explicit share of some items, that means it is shared by everyone
 
 
