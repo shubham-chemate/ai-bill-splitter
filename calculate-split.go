@@ -1,8 +1,10 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
 
-func getPersonsSplit(billItems BillItems, itemsSplit ItemsSplit) ([]PersonSplits, error) {
+func calculatePersonsSplit(billItems []BillItem, itemsSplit []ItemSplit) ([]PersonSplit, error) {
 	if len(billItems) == 0 {
 		return nil, fmt.Errorf("empty billItems")
 	}
@@ -38,13 +40,13 @@ func getPersonsSplit(billItems BillItems, itemsSplit ItemsSplit) ([]PersonSplits
 		}
 	}
 
-	personsSplitsArray := make([]PersonSplits, 0)
+	personsSplitsArray := make([]PersonSplit, 0)
 	for personName, personSplits := range personsSplits {
 		totalAmount := 0.0
 		for _, split := range personSplits {
 			totalAmount += split.Amount
 		}
-		record := PersonSplits{
+		record := PersonSplit{
 			PersonName:  personName,
 			SplitByItem: personSplits,
 			TotalAmount: totalAmount,

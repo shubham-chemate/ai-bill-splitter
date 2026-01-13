@@ -5,7 +5,9 @@ import (
 	"sort"
 )
 
-func validateBillItems(billItems BillItems) error {
+// calculatedTotal = pricePerUnit * quantity + tax
+// if quantity is not present or price per unit not present we will ignore validation
+func validateBillItems(billItems []BillItem) error {
 	for _, billItem := range billItems {
 		if billItem.TotalPrice == -1 {
 			return fmt.Errorf("total item price is not present, billItem: %+v", billItem)
@@ -15,6 +17,8 @@ func validateBillItems(billItems BillItems) error {
 		calculatedTotal := billItem.Tax
 		if billItem.PricePerUnit != -1 && billItem.Quantity != -1 {
 			calculatedTotal += billItem.PricePerUnit * float64(billItem.Quantity)
+		} else {
+			continue
 		}
 		if itemTotal != calculatedTotal {
 			return fmt.Errorf("Item Total not matching calculated total, billItem: %+v", billItem)
@@ -23,11 +27,12 @@ func validateBillItems(billItems BillItems) error {
 	return nil
 }
 
-func validateItemsSplit(billItems BillItems, itemsSplit ItemsSplit) error {
+func validateItemsSplit(billItems []BillItem, itemsSplit []ItemSplit) error {
 	itemList := []string{}
 	for _, billItem := range billItems {
 		itemList = append(itemList, billItem.ItemName)
 	}
+
 	itemSplitItems := []string{}
 	for _, splitItem := range itemsSplit {
 		itemSplitItems = append(itemSplitItems, splitItem.ItemName)

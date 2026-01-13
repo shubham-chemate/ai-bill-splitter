@@ -24,29 +24,9 @@ func getBillImage() ([]byte, string) {
 	return billImage, mimeType
 }
 
-func getBillReceptPrompt() []byte {
-	promptFileName := "bill-prompt.txt"
-	prompt, err := os.ReadFile(promptFileName)
-	if err != nil {
-		slog.Error("failed to read bill prompt file", "error", err)
-		os.Exit(1)
-	}
-	return prompt
-}
-
 func getSplitConvo() string {
 	return `Akash and Amey buy Office Chair
 			Dipti buy queen size bed
 			Aditya, Suyog and Viraj buys recliner
 			Bookshelf is shared among everyone`
-}
-
-func getSplitConvoPrompt() []byte {
-	splitConvoFileName := "rules-prompt.txt"
-	splitConvoPromptBytes, err := os.ReadFile(splitConvoFileName)
-	if err != nil {
-		slog.Error("failed to read split convo file", "error", err)
-		os.Exit(1)
-	}
-	return splitConvoPromptBytes
 }

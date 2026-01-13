@@ -2,17 +2,19 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"log/slog"
 	"mime"
 	"net/http"
+	"os"
 	"path/filepath"
 )
 
 // 7 MB
 const MAX_IMAGE_SIZE = 7 * (1 << 20)
 
-func handleBill(w http.ResponseWriter, r *http.Request) {
+func handleBillSplitRequest(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		w.Write([]byte("Method not allowed"))
@@ -30,13 +32,13 @@ func handleBill(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	file, fileHeader, err := r.FormFile("bill-image")
+	billReceiptImageFile, fileHeader, err := r.FormFile("bill-image")
 	if err != nil {
 		slog.Info("error while getting image of bill")
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	defer file.Close()
+	defer billReceiptImageFile.Close()
 
 	if fileHeader.Size > MAX_IMAGE_SIZE {
 		w.WriteHeader(http.StatusBadRequest)
@@ -44,7 +46,7 @@ func handleBill(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	billImgFileData, err := io.ReadAll(file)
+	billReceipt, err := io.ReadAll(billReceiptImageFile)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -57,15 +59,33 @@ func handleBill(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	rules := r.FormValue("split-rules")
-	if rules == "" {
+	splitConvo := r.FormValue("split-rules")
+	if splitConvo == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		slog.Info("rules cannot be empty")
 		return
 	}
 
-	slog.Info("billImage received", "bytesize", len(billImgFileData), "filesize", fileHeader.Size)
-	slog.Info("split rules received", "split-rules", rules)
+	slog.Info("billImage received", "number of bytes", len(billReceipt))
+	slog.Info("split rules received", "split-rules", splitConvo)
+
+	// *************** PROCESS BILL IMAGE & CONVERSATION TO CALCULATE BILL ***************
+
+	personsSplit, err := processBill(billReceipt, splitConvo, mimeType)
+	if err != nil {
+		slog.Info("error getting persons split", "error", err)
+		os.Exit(1)
+	}
+
+	fmt.Println("Bill Splitted as below:")
+	for _, personSplit := range personsSplit {
+		fmt.Printf("(%s, Amt: %0.3f)\n", personSplit.PersonName, personSplit.TotalAmount)
+		for _, items := range personSplit.SplitByItem {
+			if items.Amount >= 0.01 {
+				fmt.Printf("- item: %s, amount: %.3f\n", items.ItemName, items.Amount)
+			}
+		}
+	}
 
 	response := map[string]interface{}{
 		"status":  "success",
@@ -74,5 +94,4 @@ func handleBill(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
-
 }
