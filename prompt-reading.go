@@ -6,7 +6,7 @@ import (
 )
 
 func getBillReceptPrompt() []byte {
-	promptFileName := "bill-prompt.txt"
+	promptFileName := "./prompts/bill-prompt.txt"
 	prompt, err := os.ReadFile(promptFileName)
 	if err != nil {
 		slog.Error("failed to read bill prompt file", "error", err)
@@ -16,7 +16,7 @@ func getBillReceptPrompt() []byte {
 }
 
 func readSplitConvoPrompt() []byte {
-	splitConvoFileName := "rules-prompt.txt"
+	splitConvoFileName := "./prompts/rules-prompt.txt"
 	splitConvoPromptBytes, err := os.ReadFile(splitConvoFileName)
 	if err != nil {
 		slog.Error("failed to read split convo file", "error", err)

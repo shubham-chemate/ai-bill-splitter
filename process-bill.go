@@ -32,7 +32,7 @@ func getBillItems(billReceipt []byte, mimeType string) []BillItem {
 
 	prompt := getBillReceptPrompt()
 
-	billItemsRawResp, err := queryModelForBillReceipt(client, billReceipt, mimeType, prompt)
+	billItemsRawResp, err := extractItemsFromImage(client, billReceipt, mimeType, prompt)
 	if err != nil {
 		slog.Error("failed to generate content", "error", err)
 		os.Exit(1)
@@ -79,7 +79,7 @@ func getItemsSplit(billItems []BillItem, splitConvo string) []ItemSplit {
 
 	splitConvoPrompt := getSplitConvoPrompt(billItems, splitConvo)
 
-	splitConvoRawResp, err := queryModelForSplitConvo(client, splitConvoPrompt)
+	splitConvoRawResp, err := generateBillSplitRules(client, splitConvoPrompt)
 	if err != nil {
 		slog.Error("failed to get split convo json", "error", err)
 		os.Exit(1)

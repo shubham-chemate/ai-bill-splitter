@@ -9,9 +9,19 @@ import (
 	"github.com/joho/godotenv"
 )
 
+const (
+	MaxImageSizeMb    = 7
+	MaxImageSizeBytes = MaxImageSizeMb * 1024 * 1024
+
+	DefaultPort = ":8080"
+	GeminiModel = "gemini-2.5-flash"
+
+	SplitTolerance = 0.01
+)
+
 var apiKey string
 
-func main() {
+func loadAPIKey() {
 	if err := godotenv.Load(); err != nil {
 		slog.Warn("no .env file found", "error", err)
 		os.Exit(1)
@@ -23,12 +33,16 @@ func main() {
 		slog.Warn("invalid api key", "api-key", apiKey)
 		os.Exit(1)
 	}
+}
+
+func main() {
+
+	loadAPIKey()
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("hello world!"))
 	})
 	http.HandleFunc("/split", handleBillSplitRequest)
 
-	log.Fatal(http.ListenAndServe(":8080", nil))
-
+	log.Fatal(http.ListenAndServe(DefaultPort, nil))
 }

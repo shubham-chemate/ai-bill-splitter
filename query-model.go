@@ -12,6 +12,9 @@ func extractText(resp *genai.GenerateContentResponse) string {
 		return ""
 	}
 
+	// Extract text from Gemini API response
+	// Response may contain multiple content parts that need concatenation
+
 	var sb strings.Builder
 	for _, part := range resp.Candidates[0].Content.Parts {
 		sb.WriteString(string(part.Text))
@@ -19,10 +22,10 @@ func extractText(resp *genai.GenerateContentResponse) string {
 	return sb.String()
 }
 
-func queryModelForBillReceipt(client *genai.Client, billReceipt []byte, mimeType string, prompt []byte) (string, error) {
+func extractItemsFromImage(client *genai.Client, billReceipt []byte, mimeType string, prompt []byte) (string, error) {
 	resp, err := client.Models.GenerateContent(
 		context.Background(),
-		"gemini-2.5-flash",
+		GeminiModel,
 		[]*genai.Content{
 			{
 				Parts: []*genai.Part{
@@ -46,10 +49,10 @@ func queryModelForBillReceipt(client *genai.Client, billReceipt []byte, mimeType
 	return extractText(resp), nil
 }
 
-func queryModelForSplitConvo(client *genai.Client, prompt string) (string, error) {
+func generateBillSplitRules(client *genai.Client, prompt string) (string, error) {
 	resp, err := client.Models.GenerateContent(
 		context.Background(),
-		"gemini-2.5-flash",
+		GeminiModel,
 		[]*genai.Content{
 			{
 				Parts: []*genai.Part{
