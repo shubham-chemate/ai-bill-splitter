@@ -94,3 +94,30 @@ func handleBillSplitRequest(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
 }
+
+type StandardResponse struct {
+	Status  string      `json:"status"`
+	Message string      `json:"message"`
+	Data    interface{} `json:"data,omitempty"`
+	Error   interface{} `json:"error,omitempty"`
+}
+
+func respondSuccess(w http.ResponseWriter, statusCode int, message string, data interface{}) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(statusCode)
+	json.NewEncoder(w).Encode(StandardResponse{
+		Status:  "success",
+		Message: message,
+		Data:    data,
+	})
+}
+
+func respondError(w http.ResponseWriter, statusCode int, message string, details interface{}) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(statusCode)
+	json.NewEncoder(w).Encode(StandardResponse{
+		Status:  "error",
+		Message: message,
+		Error:   details,
+	})
+}
