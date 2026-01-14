@@ -14,7 +14,7 @@ const (
 	MaxImageSizeBytes = MaxImageSizeMb * 1024 * 1024
 
 	DefaultPort = ":8080"
-	GeminiModel = "gemini-2.5-flash"
+	GeminiModel = "gemini-2.5-flash-lite"
 
 	SplitTolerance = 0.01
 )

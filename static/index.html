@@ -1,115 +1,213 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Bill Splitter</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
+    <title>AI Bill Receipt Splitter</title>
     <style>
-        .container { max-width: 800px; margin-top: 2rem; }
-        .hidden { display: none; }
-        .card { padding: 1rem; border: 1px solid #e5e5e5; border-radius: 8px; margin-bottom: 1rem; }
-        .success { border-color: #2d6a4b; background-color: #f0fdf4; }
+        body { font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; background: white; padding: 25px; border: 1px solid #ddd; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: #333; margin-bottom: 25px; }
+        h2 { color: #333; margin: 15px 0 10px 0; font-size: 16px; }
+        label { display: block; margin-top: 15px; font-weight: bold; color: #555; font-size: 13px; }
+        input[type="file"], textarea { width: 100%; padding: 8px; margin-top: 4px; border: 1px solid #ccc; font-family: Arial; border-radius: 3px; font-size: 13px; }
+        textarea { resize: vertical; min-height: 70px; }
+        button { width: 100%; padding: 10px; margin-top: 15px; background: #0078d4; color: white; border: none; cursor: pointer; font-size: 13px; font-weight: 600; border-radius: 3px; transition: background 0.2s; }
+        button:hover:not(:disabled) { background: #005da1; }
+        button:disabled { background: #d9d9d9; cursor: not-allowed; }
+        .loading { display: none; margin-top: 8px; text-align: center; color: #666; font-size: 12px; }
+        #inputSection { display: block; }
+        #resultSection { display: none; }
+
+        /* Results Styling - Compact */
+        .person-card { 
+            border: 1px solid #ddd; 
+            border-radius: 4px; 
+            margin-bottom: 10px; 
+            background: #fafafa;
+            overflow: hidden;
+        }
+        .person-header { 
+            background: #0078d4; 
+            color: white; 
+            padding: 8px 12px; 
+            font-weight: bold; 
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .person-total { 
+            font-size: 15px; 
+            font-weight: bold;
+        }
+        .person-items { 
+            padding: 10px 12px; 
+        }
+        .item-row { 
+            display: flex; 
+            justify-content: space-between; 
+            padding: 5px 0; 
+            border-bottom: 1px solid #efefef;
+            font-size: 12px;
+        }
+        .item-row:last-child { 
+            border-bottom: none; 
+        }
+        .item-name { 
+            color: #555; 
+            flex: 1;
+            margin-right: 8px;
+            word-break: break-word;
+        }
+        .item-amount { 
+            color: #0078d4; 
+            font-weight: 600;
+            min-width: 60px;
+            text-align: right;
+            flex-shrink: 0;
+        }
+        .item-zero { 
+            color: #ccc; 
+        }
+        .summary-table {
+            width: 100%;
+            border-collapse: collapse;
+            border: 1px solid #ddd;
+        }
+        .summary-table th {
+            background: #f0f0f0;
+            padding: 8px 10px;
+            text-align: left;
+            font-weight: bold;
+            border-bottom: 2px solid #ddd;
+            font-size: 12px;
+        }
+        .summary-table td {
+            padding: 8px 10px;
+            border-bottom: 1px solid #ddd;
+            font-size: 12px;
+        }
+        .summary-table tr:hover {
+            background: #fafafa;
+        }
+        .summary-total {
+            font-weight: bold;
+            color: #0078d4;
+            text-align: right;
+        }
     </style>
 </head>
 <body>
 
-<main class="container">
-    <hgroup>
-        <h1>🧾 Smart Bill Receipt Splitter</h1>
-        <h2>Upload the receipt and tell me the rules. I'll handle the rest.</h2>
-    </hgroup>
+<div class="container">
+    <h1>AI Bill Receipt Splitter</h1>
 
-    <article id="inputSection">
+    <div id="inputSection">
         <form onsubmit="event.preventDefault(); handleSubmit();">
-            
-            <label for="receipt">
-                <strong>1. Upload Receipt</strong>
-                <input type="file" id="receiptInput" name="receipt" accept="image/*" required onchange="validateForm()">
-            </label>
+            <label for="billImage">Upload Receipt Image:</label>
+            <input type="file" id="billImage" accept="image/*" required onchange="validateForm()">
 
-            <label for="rules">
-                <strong>2. The Rules</strong>
-                <textarea id="rulesInput" name="rules" rows="3" 
-                placeholder="e.g. Alice had the burger and beer. Bob had the salad." 
-                required oninput="validateForm()"></textarea>
-            </label>
+            <label for="splitRules">Split Rules:</label>
+            <textarea id="splitRules" placeholder="Akash and Amey buy Office Chair&#10;Dipti buy queen size bed" required oninput="validateForm()"></textarea>
 
-            <button type="submit" id="calculateBtn" disabled>Calculate Split 🚀</button>
+            <button type="submit" id="calculateBtn" disabled>Calculate Split</button>
         </form>
         
-        <div id="loading" class="hidden" aria-busy="true">
-            Scanning receipt, applying rules, and doing math...
-        </div>
-    </article>
+        <div id="loading" class="loading">Processing...</div>
+    </div>
 
-    <article id="resultSection" class="hidden">
-        <h3>💰 Final Breakdown</h3>
-        <div id="finalResults"></div>
-        <button onclick="location.reload()" class="secondary outline">Start Over</button>
-    </article>
-</main>
+    <div id="resultSection">
+        <h2>Summary</h2>
+        <table class="summary-table">
+            <thead>
+                <tr>
+                    <th>Person</th>
+                    <th style="text-align: right;">Total</th>
+                </tr>
+            </thead>
+            <tbody id="summaryTable"></tbody>
+        </table>
+
+        <h2>Breakdown</h2>
+        <div id="personCards"></div>
+        
+        <button onclick="location.reload()" style="margin-top: 15px;">Start Over</button>
+    </div>
+</div>
 
 <script>
     function validateForm() {
-        const file = document.getElementById('receiptInput').files[0];
-        const rules = document.getElementById('rulesInput').value;
-        const btn = document.getElementById('calculateBtn');
-        
-        // Only enable button if BOTH inputs have data
-        btn.disabled = !(file && rules.trim().length > 0);
+        const file = document.getElementById('billImage').files[0];
+        const rules = document.getElementById('splitRules').value;
+        document.getElementById('calculateBtn').disabled = !(file && rules.trim());
     }
 
     async function handleSubmit() {
-        const fileInput = document.getElementById('receiptInput');
-        const rulesInput = document.getElementById('rulesInput');
-        
-        document.getElementById('loading').classList.remove('hidden');
-        document.getElementById('calculateBtn').setAttribute('aria-busy', 'true');
-
         const formData = new FormData();
-        formData.append("receipt", fileInput.files[0]);
-        formData.append("rules", rulesInput.value); // We send text + file together
+        formData.append("bill-image", document.getElementById('billImage').files[0]);
+        formData.append("split-rules", document.getElementById('splitRules').value);
+
+        document.getElementById('loading').style.display = 'block';
+        document.getElementById('calculateBtn').disabled = true;
 
         try {
-            // Call the unified endpoint
-            const res = await fetch('/split', { method: 'POST', body: formData });
-            
-            if (!res.ok) throw new Error("Analysis failed");
-            
-            const data = await res.json();
-            renderResults(data);
+            const response = await fetch('/split', { method: 'POST', body: formData });
+            const data = await response.json();
 
+            if (data.status === 'success') {
+                renderResults(data.data);
+            } else {
+                alert('Error: ' + data.message);
+            }
         } catch (e) {
-            alert("Error: " + e.message);
+            alert('Error: ' + e.message);
         } finally {
-            document.getElementById('loading').classList.add('hidden');
-            document.getElementById('calculateBtn').removeAttribute('aria-busy');
+            document.getElementById('loading').style.display = 'none';
         }
     }
 
-    function renderResults(data) {
-        const resultsDiv = document.getElementById('finalResults');
-        let html = '';
+    function renderResults(personsSplit) {
+        // Render summary table first
+        let summaryHtml = '';
+        personsSplit.forEach(person => {
+            summaryHtml += `
+            <tr>
+                <td>${person.PersonName}</td>
+                <td class="summary-total">₹${person.TotalAmount.toFixed(2)}</td>
+            </tr>
+            `;
+        });
+        document.getElementById('summaryTable').innerHTML = summaryHtml;
 
-        // Iterate through the People map
-        // Assuming Backend returns: { "final_totals": {"Alice": 25.00, "Bob": 10.00} }
-        for (const [person, total] of Object.entries(data.final_totals)) {
-            html += `
-            <div class="card success">
-                <header><strong>${person}</strong></header>
-                <div class="grid">
-                    <div>Total Owed:</div>
-                    <div style="text-align:right; font-weight:bold; font-size:1.5rem">
-                        $${total.toFixed(2)}
-                    </div>
+        // Render breakdown cards
+        let cardsHtml = '';
+        personsSplit.forEach(person => {
+            cardsHtml += `
+            <div class="person-card">
+                <div class="person-header">
+                    <span>${person.PersonName}</span>
+                    <span class="person-total">₹${person.TotalAmount.toFixed(2)}</span>
                 </div>
-            </div>`;
-        }
+                <div class="person-items">
+            `;
 
-        resultsDiv.innerHTML = html;
-        document.getElementById('inputSection').classList.add('hidden');
-        document.getElementById('resultSection').classList.remove('hidden');
+            person.SplitByItem.forEach(item => {
+                const amountClass = item.Amount === 0 ? 'item-zero' : '';
+                cardsHtml += `
+                <div class="item-row">
+                    <span class="item-name">${item.ItemName}</span>
+                    <span class="item-amount ${amountClass}">₹${item.Amount.toFixed(2)}</span>
+                </div>
+                `;
+            });
+
+            cardsHtml += `</div></div>`;
+        });
+        document.getElementById('personCards').innerHTML = cardsHtml;
+
+        document.getElementById('inputSection').style.display = 'none';
+        document.getElementById('resultSection').style.display = 'block';
     }
 </script>
 
