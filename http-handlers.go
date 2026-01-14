@@ -48,7 +48,7 @@ func parseMultipartRequest(r *http.Request) ([]byte, string, string, error) {
 
 func handleBillSplitRequest(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		respondError(w, http.StatusMethodNotAllowed, "Invalid HTTP method", nil)
+		respondError(w, http.StatusMethodNotAllowed, "Invalid HTTP method")
 		return
 	}
 
@@ -58,7 +58,7 @@ func handleBillSplitRequest(w http.ResponseWriter, r *http.Request) {
 	imageData, mimeType, splitRules, err := parseMultipartRequest(r)
 	if err != nil {
 		slog.Error("Failed to parse multipart form", "error", err)
-		respondError(w, http.StatusBadRequest, "Unable to parse the request, invalid file format", nil)
+		respondError(w, http.StatusBadRequest, "Unable to parse the request, invalid file format")
 		return
 	}
 
@@ -67,8 +67,8 @@ func handleBillSplitRequest(w http.ResponseWriter, r *http.Request) {
 
 	personsSplit, err := processBill(imageData, splitRules, mimeType)
 	if err != nil {
-		slog.Error("Failed to process bukk", "error", err)
-		respondError(w, http.StatusInternalServerError, "Unable to process bill", nil)
+		slog.Error("Failed to process bill", "error", err)
+		respondError(w, http.StatusInternalServerError, "Unable to process bill")
 		return
 	}
 
@@ -80,7 +80,7 @@ func handleBillSplitRequest(w http.ResponseWriter, r *http.Request) {
 type StandardResponse struct {
 	Status  string      `json:"status"`
 	Message string      `json:"message"`
-	Data    interface{} `json:"data"`
+	Data    interface{} `json:"data,omitempty"`
 }
 
 func respondSuccess(w http.ResponseWriter, statusCode int, message string, data interface{}) {
@@ -93,12 +93,11 @@ func respondSuccess(w http.ResponseWriter, statusCode int, message string, data 
 	})
 }
 
-func respondError(w http.ResponseWriter, statusCode int, message string, data interface{}) {
+func respondError(w http.ResponseWriter, statusCode int, message string) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(statusCode)
 	json.NewEncoder(w).Encode(StandardResponse{
 		Status:  "error",
 		Message: message,
-		Data:    data,
 	})
 }
