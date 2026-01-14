@@ -347,7 +347,7 @@
             summaryHtml += `
             <tr>
                 <td>${person.PersonName}</td>
-                <td class="summary-total">$${person.TotalAmount.toFixed(2)}</td>
+                <td class="summary-total">₹${person.TotalAmount.toFixed(2)}</td>
             </tr>
             `;
         });
@@ -359,7 +359,7 @@
             <div class="person-card">
                 <div class="person-header">
                     <span>${person.PersonName}</span>
-                    <span class="person-total">$${person.TotalAmount.toFixed(2)}</span>
+                    <span class="person-total">₹${person.TotalAmount.toFixed(2)}</span>
                 </div>
                 <div class="person-items">
             `;
@@ -369,7 +369,7 @@
                 cardsHtml += `
                 <div class="item-row">
                     <span class="item-name">${item.ItemName}</span>
-                    <span class="item-amount ${amountClass}">$${item.Amount.toFixed(2)}</span>
+                    <span class="item-amount ${amountClass}">₹${item.Amount.toFixed(2)}</span>
                 </div>
                 `;
             });
