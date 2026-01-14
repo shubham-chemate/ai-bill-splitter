@@ -5,21 +5,161 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Bill Receipt Splitter</title>
     <style>
-        body { font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px; }
-        .container { max-width: 600px; margin: 0 auto; background: white; padding: 25px; border: 1px solid #ddd; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        h1 { text-align: center; color: #333; margin-bottom: 25px; }
-        h2 { color: #333; margin: 15px 0 10px 0; font-size: 16px; }
-        label { display: block; margin-top: 15px; font-weight: bold; color: #555; font-size: 13px; }
-        input[type="file"], textarea { width: 100%; padding: 8px; margin-top: 4px; border: 1px solid #ccc; font-family: Arial; border-radius: 3px; font-size: 13px; }
-        textarea { resize: vertical; min-height: 70px; }
-        button { width: 100%; padding: 10px; margin-top: 15px; background: #0078d4; color: white; border: none; cursor: pointer; font-size: 13px; font-weight: 600; border-radius: 3px; transition: background 0.2s; }
-        button:hover:not(:disabled) { background: #005da1; }
-        button:disabled { background: #d9d9d9; cursor: not-allowed; }
-        .loading { display: none; margin-top: 8px; text-align: center; color: #666; font-size: 12px; }
+        body { 
+            font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+            background: #f5f5f5; 
+            padding: 20px;
+            line-height: 1.6;
+            color: #444;
+            font-size: 14px;
+        }
+        .container { 
+            max-width: 600px; 
+            margin: 0 auto; 
+            background: white; 
+            padding: 25px; 
+            border: 1px solid #ddd; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 { 
+            text-align: center; 
+            color: #222; 
+            margin-bottom: 25px;
+            font-size: 26px;
+            font-weight: 600;
+            letter-spacing: -0.3px;
+        }
+        h2 { 
+            color: #222; 
+            margin: 15px 0 10px 0; 
+            font-size: 15px;
+            font-weight: 600;
+            letter-spacing: 0;
+        }
+        label { 
+            display: block; 
+            margin-top: 18px; 
+            font-weight: 500;
+            color: #555;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        label:first-of-type {
+            margin-top: 0;
+        }
+        textarea { 
+            width: 100%; 
+            padding: 12px; 
+            margin-top: 8px; 
+            border: 1px solid #ddd; 
+            font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+            border-radius: 4px; 
+            font-size: 13px; 
+            resize: vertical; 
+            min-height: 100px;
+            line-height: 1.8;
+            color: #444;
+            background: #fafbfc;
+            transition: all 0.2s;
+            box-sizing: border-box;
+        }
+        textarea::placeholder {
+            color: #999;
+            font-weight: 400;
+        }
+        textarea:hover {
+            border-color: #bbb;
+            background: #ffffff;
+        }
+        textarea:focus {
+            outline: none;
+            border-color: #0078d4;
+            background: #ffffff;
+            box-shadow: 0 0 0 2px rgba(0,120,212,0.1);
+        }
+        button { 
+            width: 100%; 
+            padding: 11px; 
+            margin-top: 18px; 
+            background: #0078d4; 
+            color: white; 
+            border: none; 
+            cursor: pointer; 
+            font-size: 13px; 
+            font-weight: 500;
+            border-radius: 4px; 
+            transition: background 0.2s;
+            font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+            letter-spacing: 0.3px;
+            box-sizing: border-box;
+        }
+        button:hover:not(:disabled) { 
+            background: #005da1; 
+        }
+        button:disabled { 
+            background: #d9d9d9; 
+            cursor: not-allowed; 
+            color: #999;
+        }
+        .loading { 
+            display: none; 
+            margin-top: 10px; 
+            text-align: center; 
+            color: #666; 
+            font-size: 12px;
+            font-weight: 500;
+        }
         #inputSection { display: block; }
         #resultSection { display: none; }
 
-        /* Results Styling - Compact */
+        /* Modern File Input */
+        .file-input-wrapper {
+            position: relative;
+            margin-top: 8px;
+        }
+        .file-input-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            border: 2px dashed #0078d4;
+            border-radius: 4px;
+            background: #f8fbff;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 13px;
+            color: #0078d4;
+            font-weight: 500;
+            box-sizing: border-box;
+            width: 100%;
+        }
+        .file-input-label:hover {
+            background: #e8f4ff;
+            border-color: #005da1;
+        }
+        .file-input-label.has-file {
+            background: #f0f7f0;
+            border-color: #4caf50;
+            color: #2e7d32;
+        }
+        #billImage {
+            display: none;
+        }
+        .file-icon {
+            margin-right: 10px;
+            font-size: 18px;
+        }
+        .file-name {
+            display: none;
+            color: #2e7d32;
+            font-weight: 500;
+        }
+        .file-text {
+            color: #0078d4;
+        }
+
+        /* Results Styling */
         .person-card { 
             border: 1px solid #ddd; 
             border-radius: 4px; 
@@ -30,16 +170,17 @@
         .person-header { 
             background: #0078d4; 
             color: white; 
-            padding: 8px 12px; 
-            font-weight: bold; 
-            font-size: 14px;
+            padding: 10px 12px; 
+            font-weight: 500; 
+            font-size: 13px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            letter-spacing: 0.2px;
         }
         .person-total { 
-            font-size: 15px; 
-            font-weight: bold;
+            font-size: 14px; 
+            font-weight: 600;
         }
         .person-items { 
             padding: 10px 12px; 
@@ -47,9 +188,10 @@
         .item-row { 
             display: flex; 
             justify-content: space-between; 
-            padding: 5px 0; 
+            padding: 6px 0; 
             border-bottom: 1px solid #efefef;
             font-size: 12px;
+            line-height: 1.5;
         }
         .item-row:last-child { 
             border-bottom: none; 
@@ -57,42 +199,48 @@
         .item-name { 
             color: #555; 
             flex: 1;
-            margin-right: 8px;
+            margin-right: 10px;
             word-break: break-word;
+            font-weight: 400;
         }
         .item-amount { 
             color: #0078d4; 
-            font-weight: 600;
-            min-width: 60px;
+            font-weight: 500;
+            min-width: 65px;
             text-align: right;
             flex-shrink: 0;
         }
         .item-zero { 
-            color: #ccc; 
+            color: #bbb; 
         }
+
+        /* Summary Table */
         .summary-table {
             width: 100%;
             border-collapse: collapse;
             border: 1px solid #ddd;
+            font-size: 13px;
         }
         .summary-table th {
-            background: #f0f0f0;
-            padding: 8px 10px;
+            background: #f5f5f5;
+            padding: 10px 12px;
             text-align: left;
-            font-weight: bold;
-            border-bottom: 2px solid #ddd;
-            font-size: 12px;
+            font-weight: 600;
+            border-bottom: 1px solid #ddd;
+            color: #555;
+            letter-spacing: 0.3px;
         }
         .summary-table td {
-            padding: 8px 10px;
+            padding: 10px 12px;
             border-bottom: 1px solid #ddd;
-            font-size: 12px;
+            color: #444;
+            font-weight: 400;
         }
         .summary-table tr:hover {
             background: #fafafa;
         }
         .summary-total {
-            font-weight: bold;
+            font-weight: 500;
             color: #0078d4;
             text-align: right;
         }
@@ -101,20 +249,27 @@
 <body>
 
 <div class="container">
-    <h1>AI Bill Receipt Splitter</h1>
+    <h1>Bill Splitter</h1>
 
     <div id="inputSection">
         <form onsubmit="event.preventDefault(); handleSubmit();">
-            <label for="billImage">Upload Receipt Image:</label>
-            <input type="file" id="billImage" accept="image/*" required onchange="validateForm()">
+            <label for="billImage">Receipt Image</label>
+            <div class="file-input-wrapper">
+                <label for="billImage" class="file-input-label" id="fileLabel">
+                    <span class="file-icon">📄</span>
+                    <span class="file-text">Click or drag image here</span>
+                    <span class="file-name" id="fileName"></span>
+                </label>
+                <input type="file" id="billImage" accept="image/*" required onchange="handleFileSelect(event)">
+            </div>
 
-            <label for="splitRules">Split Rules:</label>
-            <textarea id="splitRules" placeholder="Akash and Amey buy Office Chair&#10;Dipti buy queen size bed" required oninput="validateForm()"></textarea>
+            <label for="splitRules">Split Rules</label>
+            <textarea id="splitRules" placeholder="Akash and Amey buy Office Chair&#10;Dipti buy queen size bed&#10;Everyone shares the bookshelf" required oninput="validateForm()"></textarea>
 
             <button type="submit" id="calculateBtn" disabled>Calculate Split</button>
         </form>
         
-        <div id="loading" class="loading">Processing...</div>
+        <div id="loading" class="loading">Processing receipt...</div>
     </div>
 
     <div id="resultSection">
@@ -132,11 +287,30 @@
         <h2>Breakdown</h2>
         <div id="personCards"></div>
         
-        <button onclick="location.reload()" style="margin-top: 15px;">Start Over</button>
+        <button onclick="location.reload()">Start Over</button>
     </div>
 </div>
 
 <script>
+    function handleFileSelect(event) {
+        const file = event.target.files[0];
+        const fileLabel = document.getElementById('fileLabel');
+        const fileName = document.getElementById('fileName');
+        const fileText = document.querySelector('.file-text');
+
+        if (file) {
+            fileName.textContent = file.name;
+            fileName.style.display = 'inline';
+            fileText.style.display = 'none';
+            fileLabel.classList.add('has-file');
+        } else {
+            fileName.style.display = 'none';
+            fileText.style.display = 'inline';
+            fileLabel.classList.remove('has-file');
+        }
+        validateForm();
+    }
+
     function validateForm() {
         const file = document.getElementById('billImage').files[0];
         const rules = document.getElementById('splitRules').value;
@@ -168,26 +342,24 @@
     }
 
     function renderResults(personsSplit) {
-        // Render summary table first
         let summaryHtml = '';
         personsSplit.forEach(person => {
             summaryHtml += `
             <tr>
                 <td>${person.PersonName}</td>
-                <td class="summary-total">₹${person.TotalAmount.toFixed(2)}</td>
+                <td class="summary-total">$${person.TotalAmount.toFixed(2)}</td>
             </tr>
             `;
         });
         document.getElementById('summaryTable').innerHTML = summaryHtml;
 
-        // Render breakdown cards
         let cardsHtml = '';
         personsSplit.forEach(person => {
             cardsHtml += `
             <div class="person-card">
                 <div class="person-header">
                     <span>${person.PersonName}</span>
-                    <span class="person-total">₹${person.TotalAmount.toFixed(2)}</span>
+                    <span class="person-total">$${person.TotalAmount.toFixed(2)}</span>
                 </div>
                 <div class="person-items">
             `;
@@ -197,7 +369,7 @@
                 cardsHtml += `
                 <div class="item-row">
                     <span class="item-name">${item.ItemName}</span>
-                    <span class="item-amount ${amountClass}">₹${item.Amount.toFixed(2)}</span>
+                    <span class="item-amount ${amountClass}">$${item.Amount.toFixed(2)}</span>
                 </div>
                 `;
             });
