@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Bill Splitter</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
+    <style>
+        .container { max-width: 800px; margin-top: 2rem; }
+        .hidden { display: none; }
+        .card { padding: 1rem; border: 1px solid #e5e5e5; border-radius: 8px; margin-bottom: 1rem; }
+        .success { border-color: #2d6a4b; background-color: #f0fdf4; }
+    </style>
+</head>
+<body>
+
+<main class="container">
+    <hgroup>
+        <h1>🧾 Smart Bill Receipt Splitter</h1>
+        <h2>Upload the receipt and tell me the rules. I'll handle the rest.</h2>
+    </hgroup>
+
+    <article id="inputSection">
+        <form onsubmit="event.preventDefault(); handleSubmit();">
+            
+            <label for="receipt">
+                <strong>1. Upload Receipt</strong>
+                <input type="file" id="receiptInput" name="receipt" accept="image/*" required onchange="validateForm()">
+            </label>
+
+            <label for="rules">
+                <strong>2. The Rules</strong>
+                <textarea id="rulesInput" name="rules" rows="3" 
+                placeholder="e.g. Alice had the burger and beer. Bob had the salad." 
+                required oninput="validateForm()"></textarea>
+            </label>
+
+            <button type="submit" id="calculateBtn" disabled>Calculate Split 🚀</button>
+        </form>
+        
+        <div id="loading" class="hidden" aria-busy="true">
+            Scanning receipt, applying rules, and doing math...
+        </div>
+    </article>
+
+    <article id="resultSection" class="hidden">
+        <h3>💰 Final Breakdown</h3>
+        <div id="finalResults"></div>
+        <button onclick="location.reload()" class="secondary outline">Start Over</button>
+    </article>
+</main>
+
+<script>
+    function validateForm() {
+        const file = document.getElementById('receiptInput').files[0];
+        const rules = document.getElementById('rulesInput').value;
+        const btn = document.getElementById('calculateBtn');
+        
+        // Only enable button if BOTH inputs have data
+        btn.disabled = !(file && rules.trim().length > 0);
+    }
+
+    async function handleSubmit() {
+        const fileInput = document.getElementById('receiptInput');
+        const rulesInput = document.getElementById('rulesInput');
+        
+        document.getElementById('loading').classList.remove('hidden');
+        document.getElementById('calculateBtn').setAttribute('aria-busy', 'true');
+
+        const formData = new FormData();
+        formData.append("receipt", fileInput.files[0]);
+        formData.append("rules", rulesInput.value); // We send text + file together
+
+        try {
+            // Call the unified endpoint
+            const res = await fetch('/split', { method: 'POST', body: formData });
+            
+            if (!res.ok) throw new Error("Analysis failed");
+            
+            const data = await res.json();
+            renderResults(data);
+
+        } catch (e) {
+            alert("Error: " + e.message);
+        } finally {
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('calculateBtn').removeAttribute('aria-busy');
+        }
+    }
+
+    function renderResults(data) {
+        const resultsDiv = document.getElementById('finalResults');
+        let html = '';
+
+        // Iterate through the People map
+        // Assuming Backend returns: { "final_totals": {"Alice": 25.00, "Bob": 10.00} }
+        for (const [person, total] of Object.entries(data.final_totals)) {
+            html += `
+            <div class="card success">
+                <header><strong>${person}</strong></header>
+                <div class="grid">
+                    <div>Total Owed:</div>
+                    <div style="text-align:right; font-weight:bold; font-size:1.5rem">
+                        $${total.toFixed(2)}
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        resultsDiv.innerHTML = html;
+        document.getElementById('inputSection').classList.add('hidden');
+        document.getElementById('resultSection').classList.remove('hidden');
+    }
+</script>
+
+</body>
+</html>

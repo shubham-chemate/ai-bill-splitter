@@ -39,10 +39,19 @@ func main() {
 
 	loadAPIKey()
 
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/hi", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("hello world!"))
 	})
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/" {
+			http.NotFound(w, r)
+			return
+		}
+		http.ServeFile(w, r, "./static/index.html")
+	})
 	http.HandleFunc("/split", handleBillSplitRequest)
+
+	slog.Info("server starting at", "port", DefaultPort)
 
 	log.Fatal(http.ListenAndServe(DefaultPort, nil))
 }

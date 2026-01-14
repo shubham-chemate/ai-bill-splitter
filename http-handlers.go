@@ -19,7 +19,7 @@ func parseMultipartRequest(r *http.Request) ([]byte, string, string, error) {
 
 	billReceiptImageFile, fileHeader, err := r.FormFile("bill-image")
 	if err != nil {
-		return nil, "", "", fmt.Errorf("failed while parsing bill image file, %w", err)
+		return nil, "", "", fmt.Errorf("bill image field is required, %w", err)
 	}
 	defer billReceiptImageFile.Close()
 
