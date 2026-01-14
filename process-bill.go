@@ -46,6 +46,8 @@ func getBillItems(billReceipt []byte, mimeType string) ([]BillItem, error) {
 		return nil, err
 	}
 
+	slog.Info("received bill items from llm", "bill items", billItems)
+
 	err = validateBillItems(billItems)
 	if err != nil {
 		slog.Info("billItems validation failed", "error", err)
@@ -92,6 +94,8 @@ func getItemsSplit(billItems []BillItem, splitRules string) ([]ItemSplit, error)
 		slog.Info("error while parsing splitConvRawJson", "error", err, "splitRulesRawJson", splitRulesRawResp)
 		return nil, err
 	}
+
+	slog.Info("received item split from llm", "items split", itemsSplit)
 
 	err = validateItemsSplit(billItems, itemsSplit)
 	if err != nil {

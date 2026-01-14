@@ -3,20 +3,20 @@
         "itemName": "it1",
         "splits": [
             {
-                "personName":"fr1",
-                "personShare": 0.5
+                "name":"fr1",
+                "share": 0.5
             },
             {
-                "personName":"fr2",
-                "personShare": 0.5
+                "name":"fr2",
+                "share": 0.5
             },
             {
-                "personName":"fr3",
-                "personShare": 0.0
+                "name":"fr3",
+                "share": 0.0
             },
             {
-                "personName":"fr4",
-                "personShare": 0.0
+                "name":"fr4",
+                "share": 0.0
             }
         ]
     },
@@ -24,20 +24,20 @@
         "itemName": "it2",
         "splits": [
             {
-                "personName":"fr1",
-                "personShare": 0.0
+                "name":"fr1",
+                "share": 0.0
             },
             {
-                "personName":"fr2",
-                "personShare": 0.5
+                "name":"fr2",
+                "share": 0.5
             },
             {
-                "personName":"fr3",
-                "personShare": 0.5
+                "name":"fr3",
+                "share": 0.5
             },
             {
-                "personName":"fr4",
-                "personShare": 0.0
+                "name":"fr4",
+                "share": 0.0
             }
         ]
     },
@@ -45,20 +45,20 @@
         "itemName": "it3",
         "splits": [
             {
-                "personName":"fr1",
-                "personShare": 0.333
+                "name":"fr1",
+                "share": 0.333
             },
             {
-                "personName":"fr2",
-                "personShare": 0.333
+                "name":"fr2",
+                "share": 0.333
             },
             {
-                "personName":"fr3",
-                "personShare": 0.333
+                "name":"fr3",
+                "share": 0.333
             },
             {
-                "personName":"fr4",
-                "personShare": 0.0
+                "name":"fr4",
+                "share": 0.0
             }
         ]
     },
@@ -66,20 +66,20 @@
         "itemName": "it4",
         "splits": [
             {
-                "personName":"fr1",
-                "personShare": 0.25
+                "name":"fr1",
+                "share": 0.25
             },
             {
-                "personName":"fr2",
-                "personShare": 0.25
+                "name":"fr2",
+                "share": 0.25
             },
             {
-                "personName":"fr3",
-                "personShare": 0.25
+                "name":"fr3",
+                "share": 0.25
             },
             {
-                "personName":"fr4",
-                "personShare": 0.25
+                "name":"fr4",
+                "share": 0.25
             }
         ]
     },
@@ -87,20 +87,20 @@
         "itemName": "it5",
         "splits": [
             {
-                "personName":"fr1",
-                "personShare": 0.25
+                "name":"fr1",
+                "share": 0.25
             },
             {
-                "personName":"fr2",
-                "personShare": 0.25
+                "name":"fr2",
+                "share": 0.25
             },
             {
-                "personName":"fr3",
-                "personShare": 0.25
+                "name":"fr3",
+                "share": 0.25
             },
             {
-                "personName":"fr4",
-                "personShare": 0.25
+                "name":"fr4",
+                "share": 0.25
             }
         ]
     }
