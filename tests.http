@@ -1,0 +1,24 @@
+# @imageName = large-image.png
+@imageName = furniture-bill.jpg
+
+GET http://localhost:8080
+
+###
+POST http://localhost:8080/split
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary
+
+------WebKitFormBoundary
+Content-Disposition: form-data; name="bill-image"; filename="{{imageName}}"
+Content-Type: image/jpeg
+
+< ./img/{{imageName}}
+------WebKitFormBoundary
+Content-Disposition: form-data; name="split-rules"
+Content-Type: text/plain
+
+Akash and Amey buy Office Chair
+Dipti buy queen size bed
+Aditya, Suyog and Viraj buys recliner
+Bookshelf is shared among everyone
+
+------WebKitFormBoundary--

@@ -7,7 +7,6 @@ import (
 	"log/slog"
 	"mime"
 	"net/http"
-	"os"
 	"path/filepath"
 )
 
@@ -15,12 +14,12 @@ func parseMultipartRequest(r *http.Request) ([]byte, string, string, error) {
 	// max 7 MB allowed in memory, others are in disk
 	err := r.ParseMultipartForm(MaxImageSizeBytes)
 	if err != nil {
-		return nil, "", "", fmt.Errorf("error while parsing the form")
+		return nil, "", "", fmt.Errorf("error while parsing the form, %v", err)
 	}
 
 	billReceiptImageFile, fileHeader, err := r.FormFile("bill-image")
 	if err != nil {
-		return nil, "", "", fmt.Errorf("error while parsing bill image file")
+		return nil, "", "", fmt.Errorf("error while parsing bill image file, %v", err)
 	}
 	defer billReceiptImageFile.Close()
 
@@ -30,7 +29,7 @@ func parseMultipartRequest(r *http.Request) ([]byte, string, string, error) {
 
 	billReceipt, err := io.ReadAll(billReceiptImageFile)
 	if err != nil {
-		return nil, "", "", fmt.Errorf("error while reading bill image file")
+		return nil, "", "", fmt.Errorf("error while reading bill image file, %v", err)
 	}
 
 	mimeType := mime.TypeByExtension(filepath.Ext(fileHeader.Filename))
@@ -62,7 +61,7 @@ func handleBillSplitRequest(w http.ResponseWriter, r *http.Request) {
 	imageData, mimeType, splitConvo, err := parseMultipartRequest(r)
 	if err != nil {
 		slog.Error("error while parsing multipart form", "error", err)
-		w.WriteHeader(http.StatusBadRequest)
+		respondError(w, http.StatusBadRequest, "error while parsing the request", err.Error())
 		return
 	}
 
@@ -73,26 +72,13 @@ func handleBillSplitRequest(w http.ResponseWriter, r *http.Request) {
 	personsSplit, err := processBill(imageData, splitConvo, mimeType)
 	if err != nil {
 		slog.Info("error getting persons split", "error", err)
-		os.Exit(1)
+		respondError(w, http.StatusBadRequest, "error getting person splits", err.Error())
+		return
 	}
 
-	fmt.Println("Bill Splitted as below:")
-	for _, personSplit := range personsSplit {
-		fmt.Printf("(%s, Amt: %0.3f)\n", personSplit.PersonName, personSplit.TotalAmount)
-		for _, items := range personSplit.SplitByItem {
-			if items.Amount >= 0.01 {
-				fmt.Printf("- item: %s, amount: %.3f\n", items.ItemName, items.Amount)
-			}
-		}
-	}
+	printBill(personsSplit)
 
-	response := map[string]interface{}{
-		"status":  "success",
-		"message": "bill split calculated",
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
+	respondSuccess(w, http.StatusAccepted, "bill split calculated", personsSplit)
 }
 
 type StandardResponse struct {
