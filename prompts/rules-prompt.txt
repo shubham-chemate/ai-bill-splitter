@@ -4,10 +4,16 @@ where for each item you have to give the list of friends and their contribution
 
 item names must be from item list, you have to find appropriate name from the list for the items in the conversation
 
+if you don't get explicit share of some items, that means it is shared by everyone
+if user claims an item that doesn't exist in the items list, ignore that item
+please remove the ambiguity in rules in logical way
+
 you can round floating point number to 3 decimal places, no need to have
 large number of decimal places
 
-if you don't get explicit share of some items, that means it is shared by everyone
+return response in json format
+other than json response do not include anything since response is used
+by json parsers
 
 split conversation / rules example:
 items list - it1, it2, it3, it4, it5
