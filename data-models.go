@@ -9,14 +9,14 @@ type BillItem struct {
 	Warnings     []string `json:"warnings"`
 }
 
-type SplitByPerson struct {
-	PersonName  string  `json:"personName"`
-	PersonShare float64 `json:"personShare"`
+type PersonShare struct {
+	Name  string  `json:"name"`
+	Share float64 `json:"share"`
 }
 
 type ItemSplit struct {
-	ItemName string          `json:"itemName"`
-	Splits   []SplitByPerson `json:"splits"`
+	Name         string        `json:"itemName"`
+	PersonSplits []PersonShare `json:"splits"`
 }
 
 type SplitByItem struct {

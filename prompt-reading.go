@@ -15,20 +15,20 @@ func getBillReceptPrompt() []byte {
 	return prompt
 }
 
-func readSplitConvoPrompt() []byte {
-	splitConvoFileName := "./prompts/rules-prompt.txt"
-	splitConvoPromptBytes, err := os.ReadFile(splitConvoFileName)
+func readSplitRulesPrompt() []byte {
+	splitRulesFileName := "./prompts/rules-prompt.txt"
+	splitRulesPromptBytes, err := os.ReadFile(splitRulesFileName)
 	if err != nil {
-		slog.Error("failed to read split convo file", "error", err)
+		slog.Error("failed to read split rules file", "error", err)
 		os.Exit(1)
 	}
-	return splitConvoPromptBytes
+	return splitRulesPromptBytes
 }
 
-func getSplitConvoPrompt(billItems []BillItem, splitConvo string) string {
-	splitConvoPrompt := string(readSplitConvoPrompt())
-	splitConvoPrompt += getItemsListAsString(billItems)
-	splitConvoPrompt += splitConvo
+func getSplitRulesPrompt(billItems []BillItem, splitRules string) string {
+	splitRulesPrompt := string(readSplitRulesPrompt())
+	splitRulesPrompt += getItemsListAsString(billItems)
+	splitRulesPrompt += splitRules
 
-	return splitConvoPrompt
+	return splitRulesPrompt
 }

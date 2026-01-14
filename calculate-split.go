@@ -19,12 +19,12 @@ func calculatePersonsSplit(billItems []BillItem, itemsSplit []ItemSplit) ([]Pers
 
 	personsSplits := make(map[string][]SplitByItem)
 	for _, itemSplit := range itemsSplit {
-		itemName := itemSplit.ItemName
+		itemName := itemSplit.Name
 		itemPrice := itemsPrices[itemName]
 
-		for _, split := range itemSplit.Splits {
-			personName := split.PersonName
-			personShare := split.PersonShare
+		for _, split := range itemSplit.PersonSplits {
+			personName := split.Name
+			personShare := split.Share
 
 			_, exist := personsSplits[personName]
 			if !exist {

@@ -1,14 +1,16 @@
 you have given a bill split in natural language
 please return a json array of items
 where for each item you have to give the list of friends and their contribution
+
+item names must be from item list, you have to find appropriate name from the list for the items in the conversation
+
 you can round floating point number to 3 decimal places, no need to have
 large number of decimal places
 
 if you don't get explicit share of some items, that means it is shared by everyone
 
-
 split conversation / rules example:
-the items are it1, it2, it3, it4, it5
+items list - it1, it2, it3, it4, it5
 we are four friends fr1, fr2, fr3, fr4
 it1 is shared by fr1 & fr2
 it2 is shared by fr2 & fr3

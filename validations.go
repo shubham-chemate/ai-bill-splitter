@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"sort"
 )
 
 // calculatedTotal = pricePerUnit * quantity + tax
@@ -27,36 +26,35 @@ func validateBillItems(billItems []BillItem) error {
 	return nil
 }
 
+// 1. total item share among all friends must be 0.99 to 1.01
+// 2. item from items split must be in bill item (llm hellusination)
 func validateItemsSplit(billItems []BillItem, itemsSplit []ItemSplit) error {
-	itemList := []string{}
+	billItemsSet := make(map[string]struct{})
 	for _, billItem := range billItems {
-		itemList = append(itemList, billItem.ItemName)
+		billItemsSet[billItem.ItemName] = struct{}{}
 	}
 
-	itemSplitItems := []string{}
+	splitItemsSet := make(map[string]struct{})
 	for _, splitItem := range itemsSplit {
-		itemSplitItems = append(itemSplitItems, splitItem.ItemName)
+		splitItemsSet[splitItem.Name] = struct{}{}
 
 		// split share amoung all friends should be nearly 1
 		sum := 0.0
-		for _, split := range splitItem.Splits {
-			sum += split.PersonShare
+		for _, split := range splitItem.PersonSplits {
+			sum += split.Share
 		}
 		if sum > 1.010 || sum < 0.990 {
-			return fmt.Errorf("item split is invalid, sum is not in [0.990, 1.010], item: %v, itemsplit: %v", splitItem.ItemName, splitItem.Splits)
+			return fmt.Errorf("item split is invalid, sum is not in [0.990, 1.010], item: %v, itemsplit: %v", splitItem.Name, splitItem.PersonSplits)
 		}
 	}
 
-	if len(itemList) != len(itemSplitItems) {
+	if len(billItems) != len(splitItemsSet) {
 		return fmt.Errorf("different number of items in bill and item split")
 	}
 
-	sort.Strings(itemList)
-	sort.Strings(itemSplitItems)
-
-	for i := range len(itemList) {
-		if itemList[i] != itemSplitItems[i] {
-			return fmt.Errorf("different item names in bill and split, billItems: %v, split items: %v", itemList, itemSplitItems)
+	for billItem := range billItemsSet {
+		if _, found := splitItemsSet[billItem]; !found {
+			return fmt.Errorf("different item names in bill and split, bill-item: %v, split-item: %v", billItem, splitItemsSet[billItem])
 		}
 	}
 

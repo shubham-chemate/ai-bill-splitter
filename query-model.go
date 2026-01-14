@@ -14,7 +14,6 @@ func extractText(resp *genai.GenerateContentResponse) string {
 
 	// Extract text from Gemini API response
 	// Response may contain multiple content parts that need concatenation
-
 	var sb strings.Builder
 	for _, part := range resp.Candidates[0].Content.Parts {
 		sb.WriteString(string(part.Text))

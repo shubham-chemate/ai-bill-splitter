@@ -58,7 +58,7 @@ func handleBillSplitRequest(w http.ResponseWriter, r *http.Request) {
 	imageData, mimeType, splitRules, err := parseMultipartRequest(r)
 	if err != nil {
 		slog.Error("Failed to parse multipart form", "error", err)
-		respondError(w, http.StatusBadRequest, "Unable to parse the request, invalid file format")
+		respondError(w, http.StatusBadRequest, "Unable to parse the request")
 		return
 	}
 
