@@ -48,10 +48,7 @@ func parseMultipartRequest(r *http.Request) ([]byte, string, string, error) {
 
 func handleBillSplitRequest(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		json.NewEncoder(w).Encode(map[string]interface{}{
-			"Error": "Invalid HTTP Method",
-		})
+		respondError(w, http.StatusMethodNotAllowed, "Invalid HTTP method", nil)
 		return
 	}
 
@@ -61,24 +58,23 @@ func handleBillSplitRequest(w http.ResponseWriter, r *http.Request) {
 	imageData, mimeType, splitConvo, err := parseMultipartRequest(r)
 	if err != nil {
 		slog.Error("error while parsing multipart form", "error", err)
-		respondError(w, http.StatusBadRequest, "error while parsing the request", err.Error())
+		respondError(w, http.StatusBadRequest, "Failed to parse the request", "Invalid form data or file format")
 		return
 	}
 
 	slog.Info("bill-image received", "number of bytes", len(imageData))
 	slog.Info("split-rules received", "split-rules", splitConvo)
 
-	// *************** PROCESS BILL IMAGE & CONVERSATION TO CALCULATE BILL ***************
 	personsSplit, err := processBill(imageData, splitConvo, mimeType)
 	if err != nil {
 		slog.Info("error getting persons split", "error", err)
-		respondError(w, http.StatusBadRequest, "error getting person splits", err.Error())
+		respondError(w, http.StatusInternalServerError, "error getting person splits", err.Error())
 		return
 	}
 
 	printBill(personsSplit)
 
-	respondSuccess(w, http.StatusAccepted, "bill split calculated", personsSplit)
+	respondSuccess(w, http.StatusOK, "bill split calculated", personsSplit)
 }
 
 type StandardResponse struct {
