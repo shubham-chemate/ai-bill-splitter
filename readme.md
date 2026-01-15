@@ -45,14 +45,6 @@ Split bills intelligently using AI and natural language processing. Upload a bil
 - **Image Processing:** OCR via Gemini API
 - **Deployment:** Docker, Google Cloud Run
 
-## Getting Started
-
-### Prerequisites
-
-- Go 1.21+
-- API Key for [Google Gemini](https://makersuite.google.com/app/apikey)
-- Docker (optional, for containerized deployment)
-
 ## Architecture
 
 - **main.go** – Server setup and routing
@@ -84,7 +76,5 @@ Split bills intelligently using AI and natural language processing. Upload a bil
 - User authentication and bill history
 - Receipt OCR improvements
 - Group expense tracking
-
-## Contact & Support
 
 Built with ❤️ for fairness in shared expenses.
