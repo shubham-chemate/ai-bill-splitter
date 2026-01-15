@@ -1,6 +1,6 @@
 # AI Bill Splitter
 
-Split bills intelligently using AI and natural language processing. Upload a bill image, define who paid for what with simple rules, and get instant fair calculations—no more awkward money conversations at dinner.
+Split bills intelligently using AI and natural language processing. Upload a bill image, define who paid for what with simple rules, and get instant fair calculations—no more awkward money conversations at dinner, no more time wastage after shopping just calculate bill share.
 
 ## Features
 
@@ -40,10 +40,10 @@ Split bills intelligently using AI and natural language processing. Upload a bil
 ## Tech Stack
 
 - **Backend:** Go (Golang)
-- **Frontend:** HTML/CSS/JavaScript
-- **AI Model:** Google Gemini 2.5 Flash Lite
+- **Frontend:** HTML/CSS/JavaScript (Entirely Vibe Coded 🙂)
+- **AI Model:** Google Gemini 2.5 Flash
 - **Image Processing:** OCR via Gemini API
-- **Deployment:** Docker
+- **Deployment:** Docker, Google Cloud Run
 
 ## Getting Started
 
@@ -53,48 +53,14 @@ Split bills intelligently using AI and natural language processing. Upload a bil
 - API Key for [Google Gemini](https://makersuite.google.com/app/apikey)
 - Docker (optional, for containerized deployment)
 
-### Installation
-
-1. Clone the repository
-   ```bash
-   git clone <repository-url>
-   cd ai-bill-splitter
-   ```
-
-2. Set up environment variables
-   ```bash
-   cp .env.example .env
-   # Add your GEMINI_API_KEY to .env
-   ```
-
-3. Install dependencies
-   ```bash
-   go mod download
-   ```
-
-4. Run the application
-   ```bash
-   go run *.go
-   ```
-
-   The app will be available at `http://localhost:8080`
-
-### Docker Deployment
-
-```bash
-docker build -t bill-splitter .
-docker run -p 8080:8080 -e GEMINI_API_KEY=your_key_here bill-splitter
-```
-
 ## Architecture
 
 - **main.go** – Server setup and routing
 - **http-handlers.go** – API endpoints
-- **prompt-reading.go** – Image processing via Gemini
 - **query-model.go** – AI model interaction
-- **process-bill.go** – Bill parsing and validation
+- **process-bill.go** – Bill parsing
 - **calculate-split.go** – Core splitting logic
-- **validations.go** – Input validation
+- **validations.go** – Model output validations
 - **data-models.go** – Data structures
 
 ## API Endpoints
@@ -102,22 +68,6 @@ docker run -p 8080:8080 -e GEMINI_API_KEY=your_key_here bill-splitter
 - `GET /` – Web interface
 - `POST /split` – Process bill image and rules (returns calculated splits)
 - `GET /hi` – Health check
-
-## Configuration
-
-Environment variables:
-- `GEMINI_API_KEY` – Your Google Gemini API key (required)
-
-## Development
-
-### Testing
-
-Run the included test suite:
-```bash
-go test ./...
-```
-
-Test files are included in the repository with sample bill formats.
 
 ### Project Status
 
@@ -129,15 +79,11 @@ Test files are included in the repository with sample bill formats.
 
 ## Future Enhancements
 
+- Split distribution sharing
 - Support for multiple currencies
 - User authentication and bill history
-- Mobile app
 - Receipt OCR improvements
 - Group expense tracking
-
-## License
-
-MIT License – feel free to use and modify
 
 ## Contact & Support
 
