@@ -21,9 +21,9 @@ Split bills intelligently using AI and natural language processing. Upload a bil
 **Bill:**
 | Item | Price | Qty | Tax | Total |
 |------|-------|-----|-----|-------|
-| Appetizer | $50 | 1 | $5 | $55 |
-| Entree | $30 | 2 | $6 | $66 |
-| Dessert | $20 | 1 | $2 | $22 |
+| Appetizer | ₹50 | 1 | ₹5 | ₹55 |
+| Entree | ₹30 | 2 | ₹6 | ₹66 |
+| Dessert | ₹20 | 1 | ₹2 | ₹22 |
 
 **Rules:**
 - Appetizer shared by Alice and Bob
@@ -33,9 +33,9 @@ Split bills intelligently using AI and natural language processing. Upload a bil
 **Result:**
 | Person | Appetizer | Entrees | Dessert | Total |
 |--------|-----------|---------|---------|-------|
-| Alice | $27.50 | $22.00 | — | $49.50 |
-| Bob | $27.50 | $22.00 | — | $49.50 |
-| Charlie | — | $22.00 | $22.00 | $44.00 |
+| Alice | ₹27.50 | ₹22.00 | — | ₹49.50 |
+| Bob | ₹27.50 | ₹22.00 | — | ₹49.50 |
+| Charlie | — | ₹22.00 | ₹22.00 | ₹44.00 |
 
 ## Tech Stack
 
