@@ -40,10 +40,10 @@ Split bills intelligently using AI and natural language processing. Upload a bil
 ## Tech Stack
 
 - **Backend:** Go (Golang)
-- **Frontend:** HTML/CSS/JavaScript (Entirely Vibe Coded 🙂)
 - **AI Model:** Google Gemini 2.5 Flash
 - **Image Processing:** OCR via Gemini API
 - **Deployment:** Docker, Google Cloud Run
+- **Frontend:** HTML/CSS/JavaScript (Entirely Vibe Coded 🙂)
 
 ## Architecture
 
