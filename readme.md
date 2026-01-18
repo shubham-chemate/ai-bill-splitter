@@ -67,7 +67,7 @@ Split bills intelligently using AI and natural language processing. Upload a bil
 ✅ AI image recognition  
 ✅ Web interface  
 ✅ API endpoints  
-⏳ Deployment (in progress)
+✅ Deployment - Google Cloud Run
 
 ## Future Enhancements
 
