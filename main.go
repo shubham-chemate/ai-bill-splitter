@@ -24,7 +24,6 @@ var apiKey string
 func loadAPIKey() {
 	if err := godotenv.Load(); err != nil {
 		slog.Warn("no .env file found", "error", err)
-		os.Exit(1)
 	}
 
 	apiKey = os.Getenv("GEMINI_API_KEY")
