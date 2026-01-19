@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log/slog"
 	"strings"
 
@@ -58,12 +59,10 @@ func getBillItems(billReceipt []byte, mimeType string) ([]BillItem, error) {
 }
 
 func getItemsListAsString(billItems []BillItem) string {
-	itemsString := "item list - "
-	for _, billItem := range billItems {
-		itemsString += billItem.ItemName
-		itemsString += ", "
+	itemsString := "item list:\n"
+	for i, billItem := range billItems {
+		itemsString += fmt.Sprintf("%d. %s\n", i+1, billItem.ItemName)
 	}
-	itemsString += "\n"
 	return itemsString
 }
 
