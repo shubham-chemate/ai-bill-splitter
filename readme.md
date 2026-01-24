@@ -71,6 +71,7 @@ Split bills intelligently using AI and natural language processing. Upload a bil
 
 ## Future Enhancements
 
+- gemini API timeout
 - Split distribution sharing
 - Support for multiple currencies
 - User authentication and bill history
