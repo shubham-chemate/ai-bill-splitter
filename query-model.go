@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"strings"
+	"time"
 
 	"google.golang.org/genai"
 )
@@ -22,8 +23,11 @@ func extractText(resp *genai.GenerateContentResponse) string {
 }
 
 func extractItemsFromImage(client *genai.Client, billReceipt []byte, mimeType string, prompt []byte) (string, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
 	resp, err := client.Models.GenerateContent(
-		context.Background(),
+		ctx,
 		GeminiModel,
 		[]*genai.Content{
 			{
@@ -49,8 +53,11 @@ func extractItemsFromImage(client *genai.Client, billReceipt []byte, mimeType st
 }
 
 func generateBillSplitRules(client *genai.Client, prompt string) (string, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
 	resp, err := client.Models.GenerateContent(
-		context.Background(),
+		ctx,
 		GeminiModel,
 		[]*genai.Content{
 			{

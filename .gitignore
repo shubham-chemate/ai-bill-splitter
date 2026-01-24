@@ -37,3 +37,4 @@ go.work.sum
 *.png
 
 .DS_Store
+deployment-command.text
